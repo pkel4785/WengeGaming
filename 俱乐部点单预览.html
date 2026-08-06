@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>文哥电竞 · 俱乐部点单</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f5f5f8;--card:#fff;--accent:#e94560;--accent2:#ff6b6b;--gold:#f0b90b;--text:#1a1a2e;--text2:#999;--border:#eee;--shadow:0 2px 12px rgba(0,0,0,.04);--tab-h:54px;--safe-bottom:env(safe-area-inset-bottom,0px)}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;background:var(--bg);color:var(--text);max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow:hidden}
+
+.header{background:rgba(255,255,255,.96);backdrop-filter:blur(16px);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.04);position:sticky;top:0;z-index:20}
+.header .logo{font-size:19px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.header .logo span{color:var(--accent)}
+.header .role-switch{display:flex;gap:0;background:#f0f0f3;border-radius:20px;padding:2px;font-size:11px}
+.header .role-switch .r-btn{padding:4px 12px;border-radius:18px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-size:11px;font-weight:500;transition:.2s;font-family:inherit}
+.header .role-switch .r-btn.active{background:var(--card);color:var(--accent);box-shadow:var(--shadow)}
+
+.pages-wrap{height:calc(100dvh - 50px - var(--tab-h) - var(--safe-bottom));overflow:hidden;position:relative}
+.page{display:none;height:100%;overflow-y:auto}
+.page.active{display:block}
+.page::-webkit-scrollbar{width:0}
+
+.tab-bar{height:calc(var(--tab-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(0,0,0,.04);display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:430px;width:100%;z-index:20}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--text2);cursor:pointer;transition:.2s;gap:1px}
+.tab-item .icon{font-size:21px;line-height:1}
+.tab-item.active{color:var(--accent)}
+.section{padding:12px 16px}
+.section-title{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+
+/* ===== Carousel ===== */
+.carousel{overflow:hidden;border-radius:14px;height:150px;margin-bottom:6px}
+.carousel-inner{display:flex;transition:transform .5s ease;height:100%}
+.carousel-slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px;color:#fff;text-align:center;position:relative}
+.carousel-slide .big{font-size:24px;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+.carousel-slide .small{font-size:12px;margin-top:4px;opacity:.9}
+.carousel-slide .tag{position:absolute;top:12px;right:12px;font-size:9px;padding:2px 10px;border-radius:20px;background:rgba(255,255,255,.2);backdrop-filter:blur(4px)}
+.carousel-dots{display:flex;justify-content:center;gap:5px;margin-bottom:6px}
+.carousel-dots span{width:6px;height:6px;border-radius:50%;background:#ddd;transition:.3s;cursor:pointer}
+.carousel-dots span.active{background:var(--accent);width:18px;border-radius:3px}
+.bg1{background:linear-gradient(135deg,#e94560,#ff6b6b)}
+.bg2{background:linear-gradient(135deg,#6c5ce7,#a29bfe)}
+.bg3{background:linear-gradient(135deg,#00b894,#55efc4);color:#1a1a2e}
+.bg4{background:linear-gradient(135deg,#fd79a8,#e84393)}
+
+/* ===== 美团菜单 左右分栏 ===== */
+.order-layout{display:flex;height:100%}
+.order-left{width:90px;flex-shrink:0;background:var(--card2,#fafafa);overflow-y:auto;border-right:1px solid var(--border);padding-bottom:60px}
+.order-left::-webkit-scrollbar{width:0}
+.order-cat{padding:16px 8px;text-align:center;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s;color:var(--text2);font-size:11px}
+.order-cat .ci{font-size:22px;display:block;margin-bottom:2px}
+.order-cat.active{background:var(--card);color:var(--accent);font-weight:700;position:relative}
+.order-cat.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:22px;background:var(--accent);border-radius:0 3px 3px 0}
+
+.order-right{flex:1;overflow-y:auto;padding:8px 8px 70px}
+.order-right::-webkit-scrollbar{width:0}
+
+/* 2列正方形卡片 */
+.food-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.food-card{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);transition:.15s}
+.food-card:active{transform:scale(.96)}
+.food-card .fimg{width:100%;aspect-ratio:1;background:linear-gradient(135deg,#fff0f0,#fff5f5);display:flex;align-items:center;justify-content:center;font-size:36px;color:#ddd;position:relative}
+.food-card .fimg .fhot{position:absolute;top:6px;left:6px;font-size:8px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#fff}
+.food-card .finfo{padding:8px 10px 10px}
+.food-card .finfo .fnm{font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+.food-card .finfo .fnm .fp{font-size:15px;color:var(--accent);font-weight:700}
+.food-card .finfo .fdesc{font-size:10px;color:var(--text2);margin-top:1px}
+.food-card .finfo .fbtns{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.food-card .finfo .fbtns .fsales{font-size:9px;color:#bbb}
+.food-card .addb{width:26px;height:26px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:auto}
+
+/* ===== Cart ===== */
+.cart-bar{position:fixed;bottom:calc(var(--tab-h) + var(--safe-bottom) + 8px);left:50%;transform:translateX(-50%);max-width:calc(430px - 24px);width:calc(100% - 24px);background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;display:none;align-items:center;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,.08);z-index:15}
+.cart-bar .ci{position:relative;font-size:28px;cursor:pointer}
+.cart-bar .ci .cb{position:absolute;top:-4px;right:-8px;min-width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;line-height:18px;text-align:center;font-weight:600}
+.cart-bar .cin{flex:1;font-size:12px;color:var(--text2)}
+.cart-bar .cin .ct{font-size:17px;font-weight:700;color:var(--accent)}
+.cart-bar .ca{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.cart-bar .ca:active{transform:scale(.95)}
+.cart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:105}
+.cart-overlay.show{display:block}
+.cart-popup{display:none;position:fixed;bottom:calc(var(--tab-h) + var(--safe-bottom) + 8px);left:50%;transform:translateX(-50%);max-width:430px;width:100%;background:var(--card);border-radius:18px;z-index:110;box-shadow:0 -8px 30px rgba(0,0,0,.12);max-height:55vh;overflow-y:auto;padding:16px;animation:slideUp .3s ease}
+.cart-popup.show{display:block}
+@keyframes slideUp{from{transform:translateY(100%) translateX(-50%)}to{transform:translateY(0) translateX(-50%)}}
+.qtyctl{display:flex;align-items:center;gap:6px}
+.qtyctl button{width:22px;height:22px;border-radius:50%;border:none;background:var(--card2,#fafafa);color:var(--text2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1}
+.qtyctl span{min-width:22px;text-align:center;font-size:13px;font-weight:600}
+
+/* ===== "我的" 高级版 ===== */
+.profile-bg{
+  background:linear-gradient(135deg,#e94560,#ff6b6b 40%,#ff8e8e);
+  padding:24px 20px 60px;position:relative;overflow:hidden
+}
+.profile-bg::after{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.06)}
+.profile-bg .ptop{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.profile-bg .pav{width:56px;height:56px;border-radius:50%;overflow:hidden;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;flex-shrink:0;border:2px solid rgba(255,255,255,.3)}
+.profile-bg .pinfo{color:#fff}
+.profile-bg .pinfo .pn{font-size:18px;font-weight:700}
+.profile-bg .pinfo .pid{font-size:11px;opacity:.8;margin-top:1px}
+.profile-bg .pinfo .pclub{font-size:11px;opacity:.7;margin-top:1px;background:rgba(255,255,255,.15);display:inline-block;padding:1px 10px;border-radius:10px}
+.profile-bg .pbadge{position:absolute;top:24px;right:20px;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;font-size:10px;color:#fff;backdrop-filter:blur(4px);z-index:1}
+
+.wallet-card{margin:-40px 16px 0;background:var(--card);border-radius:16px;padding:18px;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;z-index:1}
+.wallet-card .wt{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.wallet-card .wt .wl{font-size:12px;color:var(--text2)}
+.wallet-card .wt .wtg{font-size:10px;color:var(--accent);background:rgba(233,69,96,.08);padding:2px 10px;border-radius:20px}
+.wallet-card .wamt{font-size:30px;font-weight:800;color:var(--text)}
+.wallet-card .wamt small{font-size:14px;color:var(--text2);font-weight:400}
+.wallet-card .wsub{display:flex;gap:0;margin:14px -6px 0;padding-top:14px;border-top:1px solid var(--border)}
+.wallet-card .wsub > div{flex:1;text-align:center}
+.wallet-card .wsub .wn{font-size:16px;font-weight:700;color:var(--accent)}
+.wallet-card .wsub .wl2{font-size:10px;color:var(--text2);margin-top:1px}
+
+.func-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px}
+.func-item{background:var(--card);border-radius:14px;padding:16px 12px;text-align:center;box-shadow:var(--shadow);cursor:pointer;transition:.15s}
+.func-item:active{transform:scale(.96)}
+.func-item .fi{font-size:26px;margin-bottom:4px}
+.func-item .fl{font-size:12px;font-weight:600}
+.func-item .fs{font-size:9px;color:var(--text2);margin-top:1px}
+
+.profile-bottom{text-align:center;padding:6px 16px 4px}
+.profile-bottom a{font-size:10px;color:#ccc;text-decoration:none}
+
+/* ===== 通用 ===== */
+.filter-tabs{display:flex;gap:4px;margin-bottom:8px;overflow-x:auto}
+.filter-tabs::-webkit-scrollbar{height:0}
+.filter-tabs .ftab{padding:4px 10px;border-radius:14px;font-size:11px;cursor:pointer;white-space:nowrap;background:var(--card2,#fafafa);color:var(--text2);transition:.2s;font-weight:500}
+.filter-tabs .ftab.active{background:var(--accent);color:#fff}
+
+.order-card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:var(--shadow)}
+.order-card .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.order-card .svc{font-size:13px;font-weight:600}
+.order-card .svc small{font-size:10px;color:var(--text2);font-weight:400}
+.st{font-size:10px;padding:2px 10px;border-radius:20px;white-space:nowrap;font-weight:500}
+.sp{background:rgba(233,69,96,.1);color:var(--accent)}
+.sa{background:rgba(0,184,148,.1);color:#00b894}
+.ss{background:rgba(243,156,18,.15);color:#e67e22}
+.sd{background:rgba(85,239,196,.15);color:#00b894}
+.sr{background:rgba(253,121,168,.1);color:#e84393}
+.order-card .desc{font-size:11px;color:var(--text2);margin-bottom:4px}
+.order-card .meta{display:flex;justify-content:space-between;font-size:10px;color:var(--text2)}
+.order-card .price{font-size:15px;font-weight:700;color:var(--accent)}
+.order-card .actions{display:flex;gap:6px;margin-top:6px}
+.order-card .actions button{flex:1;padding:6px;border:none;border-radius:8px;font-size:11px;cursor:pointer;font-weight:600;font-family:inherit}
+.order-card .actions button:active{transform:scale(.96)}
+.ba{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.bo{background:transparent;border:1px solid var(--border);color:var(--text)}
+.bg{background:#00b894;color:#fff}
+.by{background:#e67e22;color:#fff}
+.br{background:#e84393;color:#fff}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.stat-grid .sc{background:var(--card);border-radius:12px;padding:12px;box-shadow:var(--shadow);border-left:3px solid var(--accent)}
+.stat-grid .sc .num{font-size:20px;font-weight:700;color:var(--accent)}
+.stat-grid .sc .lbl{font-size:10px;color:var(--text2);margin-top:1px}
+.stat-grid .sc.g{border-left-color:#00b894}.stat-grid .sc.g .num{color:#00b894}
+.stat-grid .sc.p{border-left-color:#6c5ce7}.stat-grid .sc.p .num{color:#6c5ce7}
+.stat-grid .sc.b{border-left-color:#0984e3}.stat-grid .sc.b .num{color:#0984e3}
+
+.admin-tabs{display:flex;gap:0;overflow-x:auto;margin-bottom:6px}
+.admin-tabs::-webkit-scrollbar{height:0}
+.admin-tabs .atab{padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--text2);border-bottom:2px solid transparent;transition:.2s}
+.admin-tabs .atab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.empty{text-align:center;padding:30px 20px;color:var(--text2)}
+.empty .ic{font-size:36px;opacity:.3;margin-bottom:4px}
+.empty p{font-size:12px}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:430px;max-height:70vh;overflow-y:auto;padding:20px;animation:slideUp .3s ease}
+.modal .mtitle{font-size:16px;font-weight:700;margin-bottom:12px;text-align:center}
+.modal .btn-row{display:flex;gap:8px;margin-top:12px}
+.modal .btn-row button{flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.modal .btn-row .cancel{background:var(--card2,#fafafa);color:var(--text2)}
+
+.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:200;background:var(--card);border:1px solid var(--accent);color:var(--text);padding:8px 18px;border-radius:10px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.toast.show{opacity:1}
+.home-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.home-quick > div{background:var(--card);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow);cursor:pointer;transition:.15s}
+.home-quick > div:active{transform:scale(.96)}
+.home-quick .ic{font-size:28px;margin-bottom:4px}.home-quick .lbl{font-size:11px;font-weight:600}
+
+/* ===== 首页新增模块 ===== */
+.online-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow);margin-bottom:6px}
+.online-bar .pulse-dot{width:8px;height:8px;border-radius:50%;background:#00b894;animation:pulse 1.6s infinite;flex-shrink:0}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,184,148,.4)}70%{box-shadow:0 0 0 8px rgba(0,184,148,0)}100%{box-shadow:0 0 0 0 rgba(0,184,148,0)}}
+.h-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;overscroll-behavior-x:contain}
+.h-scroll::-webkit-scrollbar{display:none}
+.h-scroll>*{scroll-snap-align:start}
+.h-carry{flex:0 0 132px;background:var(--card);border-radius:12px;padding:12px;text-align:center;box-shadow:var(--shadow);cursor:pointer;transition:.15s}
+.h-carry:active{transform:scale(.96)}
+.h-carry .ava{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 6px}
+.h-carry .nm{font-size:13px;font-weight:600}
+.h-carry .stars{font-size:10px;color:var(--gold);margin-top:2px;letter-spacing:1px}
+.h-carry .tag2{font-size:9px;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-order{flex:0 0 158px;background:var(--card);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+.h-order .svc{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-order .hst{margin:5px 0}
+.h-order .price{font-size:15px;font-weight:700;color:var(--accent)}
+.h-order .tm{font-size:9px;color:var(--text2);margin-top:2px}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.why-item{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
+.why-item .wi{font-size:24px}
+.why-item .wl{font-size:12px;font-weight:600}
+.why-item .ws{font-size:9px;color:var(--text2)}
+
+/* ===== 常见问题 ===== */
+.faq-top{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.faq-top .fbk{background:none;border:none;font-size:16px;color:var(--text2);cursor:pointer;padding:0 6px;font-family:inherit}
+.faq-top .ftt{font-size:15px;font-weight:700}
+.faq-item{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:8px;box-shadow:var(--shadow)}
+.faq-item .fq{font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.faq-item .fq .ar{color:#ddd;font-size:16px;transition:transform .3s}
+.faq-item.open .fq .ar{transform:rotate(90deg);color:var(--accent)}
+.faq-item .fa{display:none;font-size:12px;color:var(--text2);line-height:1.9;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.faq-item.open .fa{display:block}
+.faq-item .fa li{list-style:none;position:relative;padding-left:12px;margin-bottom:6px}
+.faq-item .fa li::before{content:'';position:absolute;left:0;top:8px;width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.faq-note{margin-top:10px;padding:12px 14px;border-radius:12px;background:#fff5f7;color:var(--accent);font-size:11px;line-height:1.7}
+
+/* ===== 陪玩价格表 ===== */
+.ptable{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.ptable table{width:100%;border-collapse:collapse;font-size:12px}
+.ptable th,.ptable td{padding:11px 8px;text-align:center;border-bottom:1px solid var(--border)}
+.ptable thead th{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600;font-size:11px}
+.ptable tbody tr:last-child td{border-bottom:none}
+.ptable .rk{font-weight:600}
+.ptable .pr{color:var(--accent);font-weight:700;font-size:14px}
+.ptable-note{margin-top:10px;background:#fff5f7;border:1px solid rgba(233,69,96,.12);border-radius:12px;padding:12px 14px;font-size:11px;color:var(--text2);line-height:1.9}
+.ptable-note strong{color:var(--accent)}
+
+/* ===== 填写订单信息页 ===== */
+.check-card{background:var(--card);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.check-card .f{margin-bottom:12px}
+.check-card label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px}
+.check-card label em{color:var(--accent);font-style:normal}
+.check-card input,.check-card textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card2,#fafafa);font-size:13px;font-family:inherit;outline:none;transition:.2s;color:var(--text)}
+.check-card input:focus,.check-card textarea:focus{border-color:var(--accent);background:#fff}
+.check-card textarea{resize:vertical;min-height:48px}
+.chk-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px}
+.chk-row .nm{color:var(--text2)}
+.chk-row .pr{color:var(--text);font-weight:600}
+.pick-row{display:flex;gap:8px}
+.pick-btn{flex:1;text-align:center;padding:9px 0;border-radius:10px;border:1px solid var(--border);background:var(--card2,#fafafa);font-size:12px;color:var(--text2);cursor:pointer;transition:.15s;font-weight:500}
+.pick-btn.active{background:#fff5f7;border-color:var(--accent);color:var(--accent);font-weight:600}
+.carry-pick{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.carry-pick-item{display:flex;align-items:center;gap:8px;background:var(--card2,#fafafa);border:1px solid var(--border);border-radius:10px;padding:7px 8px;cursor:pointer;transition:.15s}
+.carry-pick-item.sel{border-color:var(--accent);background:#fff5f7}
+.carry-pick-item .cpa{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.carry-pick-item .cpn{flex:1;min-width:0}
+.carry-pick-item .cpn .t{font-size:12px;font-weight:600;white-space:nowrap}
+.carry-pick-item .cpn .t .stars{font-size:9px;color:var(--gold)}
+.carry-pick-item .cpn .s{font-size:9px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coupon-row{display:flex;gap:8px}
+.coupon-row input{flex:1}
+.coupon-btn{background:var(--card2,#fafafa);border:1px solid var(--border);border-radius:10px;padding:0 18px;font-size:12px;color:var(--accent);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.coupon-btn:active{background:#fff0f0}
+/* ===== 支付页 ===== */
+.pay-top{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.pay-top .pbk{background:none;border:none;font-size:16px;color:var(--text2);cursor:pointer;padding:0 6px;font-family:inherit}
+.pay-top .ptt{font-size:15px;font-weight:700}
+.pay-sum{background:var(--card);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:10px}
+.pay-sum .row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
+.pay-sum .row .nm{color:var(--text);font-weight:500}
+.pay-sum .row .pr{color:var(--text2)}
+.pay-sum .divider{height:1px;background:var(--border);margin:8px 0}
+.pay-title{font-size:13px;font-weight:700;margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+.pay-method{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:8px;border:2px solid transparent;cursor:pointer;transition:.15s}
+.pay-method:active{transform:scale(.98)}
+.pay-method.selected{border-color:var(--accent);background:#fff5f7}
+.pay-method .pmi{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+.pmi-wx{background:#07c160}.pmi-ali{background:#1677ff}.pmi-wallet{background:linear-gradient(135deg,#e94560,#ff6b6b)}
+.pay-method .pmn{flex:1}
+.pay-method .pmn .t{font-size:14px;font-weight:600}
+.pay-method .pmn .s{font-size:10px;color:var(--text2);margin-top:1px}
+.pay-method .pms{width:20px;height:20px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.pay-method.selected .pms{border-color:var(--accent);background:var(--accent)}
+.pay-method.selected .pms::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff}
+.pay-method.disabled{opacity:.5}
+.pay-foot{position:fixed;bottom:calc(var(--tab-h) + var(--safe-bottom));left:50%;transform:translateX(-50%);max-width:430px;width:100%;background:var(--card);border-top:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:12px;z-index:15}
+.pay-mode .pay-foot{bottom:0;padding-bottom:calc(10px + var(--safe-bottom))}
+.pay-foot .amt{flex:1}
+.pay-foot .amt .l{font-size:10px;color:var(--text2)}
+.pay-foot .amt .v{font-size:20px;font-weight:800;color:var(--accent)}
+.pay-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.pay-btn:active{transform:scale(.95)}
+.pay-btn:disabled{opacity:.6}
+.pay-success{text-align:center;padding:30px 20px}
+.pay-success .sic{font-size:56px;margin-bottom:10px}
+.pay-success .st1{font-size:18px;font-weight:800}
+.pay-success .st2{font-size:12px;color:var(--text2);margin-top:4px}
+.pay-success .sbox{background:var(--card2,#fafafa);border-radius:12px;padding:14px;margin-top:16px;font-size:12px;color:var(--text2)}
+.pay-success .sbox div{display:flex;justify-content:space-between;padding:5px 0}
+.pay-success .sbox b{color:var(--text);font-weight:600}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo"><span>文</span>哥电竞</div>
+  <div class="role-switch">
+    <button class="r-btn active" data-r="customer" onclick="swRole('customer')">客户</button>
+    <button class="r-btn" data-r="admin" onclick="swRole('admin')">管理</button>
+  </div>
+</div>
+
+<div class="pages-wrap">
+  <!-- 客户首页 -->
+  <div class="page active" id="ch">
+    <div class="section" style="padding-top:12px">
+      <div class="carousel"><div class="carousel-inner" id="ci"></div></div>
+      <div class="carousel-dots" id="cd"></div>
+      <!-- 在线人数 -->
+      <div class="online-bar">
+        <div style="display:flex;align-items:center;gap:8px"><span class="pulse-dot"></span><span style="font-size:12px;color:var(--text2)">当前在线 · 打手随时待命</span></div>
+        <div style="display:flex;align-items:baseline;gap:2px"><span style="font-size:20px;font-weight:800;color:var(--accent)" id="hOnline">0</span><span style="font-size:10px;color:var(--text2)">人</span></div>
+      </div>
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px">
+        <div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;box-shadow:var(--shadow)"><div style="font-size:20px;font-weight:700;color:var(--accent)" id="hSettled">0</div><div style="font-size:10px;color:var(--text2)">已结账</div></div>
+        <div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;box-shadow:var(--shadow)"><div style="font-size:20px;font-weight:700;color:#00b894" id="hActive">0</div><div style="font-size:10px;color:var(--text2)">进行中</div></div>
+        <div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;box-shadow:var(--shadow)"><div style="font-size:20px;font-weight:700;color:#6c5ce7" id="hTotal">0</div><div style="font-size:10px;color:var(--text2)">总订单</div></div>
+      </div>
+      <!-- 常用功能 -->
+      <div class="section-title" style="font-size:14px">⚡ 常用功能</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="background:var(--card);border-radius:12px;padding:14px 4px;text-align:center;box-shadow:var(--shadow);cursor:pointer" onclick="swCust('order')"><div style="font-size:24px">📋</div><div style="font-size:11px;font-weight:500;margin-top:2px">快速下单</div></div>
+        <div style="background:var(--card);border-radius:12px;padding:14px 4px;text-align:center;box-shadow:var(--shadow);cursor:pointer" onclick="swCust('myorders')"><div style="font-size:24px">📦</div><div style="font-size:11px;font-weight:500;margin-top:2px">我的订单</div></div>
+        <div style="background:var(--card);border-radius:12px;padding:14px 4px;text-align:center;box-shadow:var(--shadow);cursor:pointer" onclick="swCust('carries')"><div style="font-size:24px">🎮</div><div style="font-size:11px;font-weight:500;margin-top:2px">打手列表</div></div>
+        <div style="background:var(--card);border-radius:12px;padding:14px 4px;text-align:center;box-shadow:var(--shadow);cursor:pointer" onclick="swCust('profile')"><div style="font-size:24px">👤</div><div style="font-size:11px;font-weight:500;margin-top:2px">个人中心</div></div>
+      </div>
+      <!-- 热门打手 -->
+      <div class="section-title" style="font-size:14px">🔥 热门打手 <span style="margin-left:auto;font-size:10px;font-weight:400;color:var(--text2);cursor:pointer" onclick="swCust('carries')">查看全部 ›</span></div>
+      <div id="hCarries"></div>
+      <!-- 为什么选择我们 -->
+      <div class="section-title" style="font-size:14px;margin-top:12px">💎 为什么选择我们</div>
+      <div class="why-grid">
+        <div class="why-item"><div class="wi">🛡️</div><div class="wl">纯绿无挂</div><div class="ws">不开挂·不违规·纯手打</div></div>
+        <div class="why-item"><div class="wi">🎤</div><div class="wl">开麦聊天</div><div class="ws">全程语音·气氛拉满</div></div>
+        <div class="why-item"><div class="wi">💎</div><div class="wl">情绪价值</div><div class="ws">输赢都有人哄你</div></div>
+        <div class="why-item"><div class="wi">🏆</div><div class="wl">专业团队</div><div class="ws">认证打手·高胜率</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 下单（美团左右分栏+2列正方形卡片） -->
+  <div class="page" id="corder">
+    <div class="order-layout">
+      <div class="order-left" id="ol"></div>
+      <div class="order-right" id="or"></div>
+    </div>
+  </div>
+
+  <!-- 打手 -->
+  <div class="page" id="cc">
+    <div class="section" style="padding-bottom:0"><div class="section-title">🎮 打手 <span class="more" id="ccount"></span></div></div>
+    <div id="cclist"></div>
+  </div>
+
+  <!-- 我的订单 -->
+  <div class="page" id="cmy">
+    <div class="section">
+      <div class="filter-tabs" id="cof">
+        <div class="ftab active" data-f="all" onclick="fc('all')">全部</div>
+        <div class="ftab" data-f="pending" onclick="fc('pending')">待接单</div>
+        <div class="ftab" data-f="active" onclick="fc('active')">进行中</div>
+        <div class="ftab" data-f="paused" onclick="fc('paused')">存单</div>
+        <div class="ftab" data-f="done" onclick="fc('done')">已完成</div>
+      </div>
+      <div id="col"></div>
+    </div>
+  </div>
+
+  <!-- "我的" 高级版 -->
+  <div class="page" id="cp">
+    <div class="profile-bg">
+      <div class="pbadge">⚡ 护航会员</div>
+      <div class="ptop">
+        <div class="pav">⚡</div>
+        <div class="pinfo">
+          <div class="pn">文哥会员</div>
+          <div class="pid">会员ID: 888888</div>
+          <div class="pclub">文哥电竞 · 三角洲护航</div>
+        </div>
+      </div>
+    </div>
+    <div class="wallet-card">
+      <div class="wt"><span class="wl">💰 商户钱包</span><span class="wtg">已结账</span></div>
+      <div class="wamt">¥<span id="pwSettled">0</span> <small>累计</small></div>
+      <div class="wsub">
+        <div><div class="wn" id="pwActiveP">0</div><div class="wl2">进行中</div></div>
+        <div><div class="wn" id="pwTotalP">0</div><div class="wl2">总订单</div></div>
+        <div><div class="wn" id="pwDoneP">0</div><div class="wl2">已完成</div></div>
+      </div>
+    </div>
+    <div class="func-grid">
+      <div class="func-item" onclick="toast('功能开发中')"><div class="fi">📥</div><div class="fl">账户充值</div><div class="fs">即将开放</div></div>
+      <div class="func-item" onclick="toast('功能开发中')"><div class="fi">💳</div><div class="fl">申请提现</div><div class="fs">打手专用</div></div>
+      <div class="func-item" onclick="toast('功能开发中')"><div class="fi">🪪</div><div class="fl">打手认证</div><div class="fs">成为打手</div></div>
+      <div class="func-item" onclick="toast('功能开发中')"><div class="fi">👑</div><div class="fl">成为管事</div><div class="fs">管理权限</div></div>
+      <div class="func-item" onclick="swCust('faq')"><div class="fi">?</div><div class="fl">常见问题</div><div class="fs">老板点单须知</div></div>
+      <div class="func-item" onclick="toast('客服微信: WengeDJ_01')"><div class="fi">💬</div><div class="fl">联系平台</div><div class="fs">在线客服</div></div>
+    </div>
+    <div class="profile-bottom"><a href="#">点击了解 · 搭建同款小程序</a></div>
+  </div>
+
+  <!-- 常见问题 -->
+  <div class="page" id="cfaq">
+    <div class="faq-top"><button class="fbk" onclick="swCust('profile')">←</button><span class="ftt">常见问题</span></div>
+    <div class="section">
+      <div class="faq-item" onclick="tf(this)">
+        <div class="fq">老板点单须知<span class="ar">›</span></div>
+        <div class="fa"><ul>
+          <li>时长按照第一把游戏开局时间开始计算，续费默认前一个小时没问题。</li>
+          <li>文宝宝不接受技术投诉，所有单子打结算默认本单没有问题。</li>
+          <li>单陪任意一小时内老板带出价值总和超600W及以上，则一小时无赔付。</li>
+          <li>双陪任意一小时内老板带出价值总和1000W及以上，则这一小时无赔付。</li>
+          <li>如遇外挂或游戏内BUG、老板不听陪陪指挥、或老板要求猛攻打法，当局无赔付。</li>
+          <li>撤离率赔付售后期限为24小时内，连坐追缴期限为7天内。</li>
+          <li>半小时内有问题（陪玩原因）可以免费换人。</li>
+          <li>老板私下无论以任何手段（包括但不限于游戏中交流、抖音直播私信）加到打手的联系方式，一经发现该单半价。</li>
+          <li>若老板账号为黑屋状态，单陪人头数-2；如遇外挂此局不计入赔付。</li>
+          <li>如遇陪玩服务态度差，向客服反馈后核实本单全免。</li>
+          <li>相应价位陪玩，不建议上强度，不接受技术投诉，不包撤离率。</li>
+          <li>若因三角洲机制问题（短封）导致老板购号被追缴，则陪玩会承担追缴部分赔偿，但不全免。</li>
+          <li>若陪玩被发现开挂，将扣除陪玩所有费用，并尽力补偿给老板。</li>
+          <li>因陪玩大部分需要租号，只要数据异常、陪玩实力太强或历史战绩被判断为护航都会被封禁，但并不代表陪玩是挂，因此会正常算单，请老板理解。</li>
+          <li>未成年禁止消费（不接受未成年退款）。</li>
+          <li>最终解释权归文哥电竞所有。</li>
+        </ul></div>
+      </div>
+      <div class="faq-note">其他问题可咨询客服微信：WengeDJ_01</div>
+    </div>
+  </div>
+
+  <!-- 填写订单信息 -->
+  <div class="page" id="ccheck">
+    <div class="pay-top"><button class="pbk" onclick="swCust('order')">←</button><span class="ptt">填写订单信息</span></div>
+    <div class="section" style="padding-bottom:120px">
+      <div class="check-card">
+        <div class="f" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:12px"><label>🧾 订单明细</label><div id="coItems"></div></div>
+        <div class="f"><label>🎮 游戏ID（三角洲UID / 游戏ID）<em>*</em></label><input id="coGameId" placeholder="必填" maxlength="32"></div>
+        <div class="f"><label>💬 微信号<em>*</em></label><input id="coWechat" placeholder="请输入微信号" maxlength="32"></div>
+        <div class="f"><label>📱 手机号<em>*</em></label><input id="coPhone" type="tel" placeholder="紧急联系用" maxlength="15"></div>
+        <div class="f">
+          <label>🎯 指定打手</label>
+          <div class="pick-row">
+            <div class="pick-btn active" id="cpk-no" onclick="pickCarry(0)">否</div>
+            <div class="pick-btn" id="cpk-yes" onclick="pickCarry(1)">是</div>
+          </div>
+        </div>
+        <div class="f" id="coCarryBox" style="display:none">
+          <label>👤 选择打手（全部打手）</label>
+          <div class="carry-pick" id="coCarryList"></div>
+        </div>
+        <div class="f">
+          <label>🎟️ 优惠券</label>
+          <div class="coupon-row"><input id="coCoupon" placeholder="输入优惠券码" maxlength="20"><button class="coupon-btn" onclick="applyCoupon()">使用</button></div>
+          <div id="coCouponMsg" style="font-size:10px;margin-top:5px;min-height:14px"></div>
+        </div>
+        <div class="f" style="margin-bottom:0"><label>📝 备注</label><textarea id="coNote" placeholder="想几点打？有什么要求？"></textarea></div>
+      </div>
+    </div>
+    <div class="pay-foot">
+      <div class="amt"><div class="l">合计（优惠已折算）</div><div class="v" id="coTotal">¥0</div></div>
+      <button class="pay-btn" onclick="submitCheck()">提交订单</button>
+    </div>
+  </div>
+
+  <!-- 支付页 -->
+  <div class="page" id="cpay">
+    <div class="pay-top"><button class="pbk" onclick="backFromPay()">←</button><span class="ptt">收银台</span></div>
+    <div class="section" style="padding-bottom:110px">
+      <div class="pay-sum" id="paySum"></div>
+      <div class="pay-title">💳 选择支付方式</div>
+      <div class="pay-method selected" id="pm-wx" onclick="selPay('wx')">
+        <div class="pmi pmi-wx">微</div>
+        <div class="pmn"><div class="t">微信支付</div><div class="s">推荐使用 · 快捷安全</div></div>
+        <div class="pms"></div>
+      </div>
+      <div class="pay-method" id="pm-ali" onclick="selPay('ali')">
+        <div class="pmi pmi-ali">支</div>
+        <div class="pmn"><div class="t">支付宝</div><div class="s">支持花呗 · 余额</div></div>
+        <div class="pms"></div>
+      </div>
+      <div class="pay-method" id="pm-wallet" onclick="selPay('wallet')">
+        <div class="pmi pmi-wallet">💰</div>
+        <div class="pmn"><div class="t">钱包支付</div><div class="s" id="walletBal">余额 ¥0.00</div></div>
+        <div class="pms"></div>
+      </div>
+      <p style="font-size:10px;color:#ccc;margin-top:12px;text-align:center">钱包支持预存余额 · 充值功能即将开放</p>
+    </div>
+    <div class="pay-foot">
+      <div class="amt"><div class="l">应付金额</div><div class="v" id="payAmt">¥0</div></div>
+      <button class="pay-btn" id="payBtn" onclick="confirmPay()">确认支付</button>
+    </div>
+  </div>
+
+  <!-- ===== 管理员 ===== -->
+  <div class="page" id="alogin">
+    <div class="empty" style="padding:60px 20px"><div class="ic" style="font-size:36px;opacity:1">🔐</div><p style="font-size:15px;font-weight:600;margin:8px 0 4px">管理员登录</p><p style="font-size:11px;color:var(--text2);margin-bottom:16px">输入密码</p>
+      <div style="max-width:240px;margin:0 auto"><input type="password" id="apw" placeholder="密码" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);font-size:16px;text-align:center;outline:none;font-family:inherit;margin-bottom:8px" onkeydown="if(event.key==='Enter')al()">
+      <button class="ba" style="width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onclick="al()">登录</button>
+      <p style="font-size:9px;color:#ccc;margin-top:4px">默认: admin123</p></div>
+    </div>
+  </div>
+  <div class="page" id="adash">
+    <div class="section"><div class="section-title">📊 总览</div>
+      <div class="stat-grid">
+        <div class="sc"><div class="num" id="ato">0</div><div class="lbl">总订单</div></div>
+        <div class="sc g"><div class="num" id="aao">0</div><div class="lbl">进行中</div></div>
+        <div class="sc p"><div class="num" id="asa">¥0</div><div class="lbl">已结账</div></div>
+        <div class="sc b"><div class="num" id="apo">0</div><div class="lbl">存单中</div></div>
+      </div>
+    </div>
+    <div class="section"><div class="section-title">🕐 待处理</div><div id="app"></div></div>
+  </div>
+  <div class="page" id="aorders">
+    <div class="section" style="padding-bottom:0">
+      <div class="admin-tabs" id="aot">
+        <div class="atab active" onclick="fa('all')">全部</div>
+        <div class="atab" onclick="fa('pending')">待接单</div>
+        <div class="atab" onclick="fa('active')">进行中</div>
+        <div class="atab" onclick="fa('paused')">存单</div>
+        <div class="atab" onclick="fa('done')">已完成</div>
+        <div class="atab" onclick="fa('rejected')">已拒绝</div>
+      </div>
+    </div>
+    <div class="section" id="aol"></div>
+  </div>
+  <div class="page" id="astats">
+    <div class="section"><div class="section-title">📈 统计</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="sc"><div class="num" id="asP">0</div><div class="lbl">待接单</div></div>
+        <div class="sc g"><div class="num" id="asA">0</div><div class="lbl">进行中</div></div>
+        <div class="sc b"><div class="num" id="asS">0</div><div class="lbl">存单</div></div>
+        <div class="sc p"><div class="num" id="asD">0</div><div class="lbl">已完成</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab -->
+<div class="tab-bar" id="ctab">
+  <div class="tab-item active" onclick="swCust('home')"><span class="icon">🏠</span>首页</div>
+  <div class="tab-item" onclick="swCust('order')"><span class="icon">📋</span>下单</div>
+  <div class="tab-item" onclick="swCust('carries')"><span class="icon">🎮</span>打手</div>
+  <div class="tab-item" onclick="swCust('myorders')"><span class="icon">📦</span>订单</div>
+  <div class="tab-item" onclick="swCust('profile')"><span class="icon">👤</span>我的</div>
+</div>
+<div class="tab-bar" id="atab" style="display:none">
+  <div class="tab-item active" onclick="swAdmin('dashboard')"><span class="icon">📊</span>总览</div>
+  <div class="tab-item" onclick="swAdmin('orders')"><span class="icon">📦</span>订单</div>
+  <div class="tab-item" onclick="swAdmin('stats')"><span class="icon">📈</span>统计</div>
+</div>
+
+<!-- Cart -->
+<div class="cart-bar" id="cartBar">
+  <div class="ci" onclick="tc()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);vertical-align:middle"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span class="cb" id="ccnt">0</span></div>
+  <div class="cin">合计 <span class="ct" id="ctot">¥0</span></div>
+  <button class="ca" onclick="sc()">提交订单</button>
+</div>
+<div class="cart-overlay" id="co2" onclick="tc()"></div>
+<div class="cart-popup" id="cp2"><div class="cptitle">购物车</div><div id="cplist"></div>
+  <div style="display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+    <button style="flex:1;padding:9px;border:none;border-radius:8px;background:var(--card2,#fafafa);color:var(--text2);cursor:pointer;font-family:inherit;font-size:12px" onclick="cc2()">清空</button>
+    <button style="flex:2;padding:9px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600" onclick="sc()">提交 (¥<span id="cpt">0</span>)</button>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="mAc"><div class="modal" style="text-align:center"><div style="font-size:36px;margin-bottom:4px">✅</div><div class="mtitle">确认接单</div><p style="font-size:12px;color:var(--text2);margin-bottom:10px">确定接受？</p><div class="btn-row"><button class="cancel" onclick="cm('mAc')">取消</button><button class="ba" onclick="cAc()">确认</button></div></div></div>
+<div class="modal-overlay" id="mSt"><div class="modal" style="text-align:center"><div style="font-size:36px;margin-bottom:4px">💰</div><div class="mtitle">结账</div><p style="font-size:12px;color:var(--text2);margin-bottom:4px">结算此订单</p><div style="font-size:22px;font-weight:700;color:var(--accent);margin-bottom:10px" id="sP">¥0</div><div class="btn-row"><button class="cancel" onclick="cm('mSt')">取消</button><button class="bg" onclick="cSt()">确认</button></div></div></div>
+<div class="modal-overlay" id="mRj"><div class="modal" style="text-align:center"><div style="font-size:36px;margin-bottom:4px">🚫</div><div class="mtitle">拒绝</div><p style="font-size:12px;color:var(--text2);margin-bottom:12px">拒绝此订单？</p><div class="btn-row"><button class="cancel" onclick="cm('mRj')">取消</button><button class="br" onclick="cRj()">拒绝</button></div></div></div>
+<div class="modal-overlay" id="mPs"><div class="modal" style="text-align:center"><div style="font-size:36px;margin-bottom:4px">⏸️</div><div class="mtitle">存单</div><p style="font-size:12px;color:var(--text2);margin-bottom:12px">暂停此订单可恢复</p><div class="btn-row"><button class="cancel" onclick="cm('mPs')">取消</button><button class="by" onclick="cPs()">确定</button></div></div></div>
+<div class="modal-overlay" id="mRs"><div class="modal" style="text-align:center"><div style="font-size:36px;margin-bottom:4px">▶️</div><div class="mtitle">恢复</div><p style="font-size:12px;color:var(--text2);margin-bottom:12px">恢复此存单？</p><div class="btn-row"><button class="cancel" onclick="cm('mRs')">取消</button><button class="bg" onclick="cRs()">恢复</button></div></div></div>
+<div class="modal-overlay" id="mOk"><div class="modal" style="text-align:center">
+  <div class="pay-success">
+    <div class="sic">✅</div>
+    <div class="st1">支付成功</div>
+    <div class="st2">订单已生成</div>
+    <div class="sbox">
+      <div><span>订单号</span><b id="okNo">—</b></div>
+      <div><span>支付方式</span><b id="okPay">—</b></div>
+      <div><span>支付金额</span><b id="okAmt" style="color:var(--accent)">¥0</b></div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="ba" onclick="payDone()">完成</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PT={
+'护航单':{'体验':{p:98,n:'双护·累计保底788W'},'标准':{p:188,n:'双护·累计保底1288W'},'高级':{p:288,n:'双护·累计保底2088W'},'豪华':{p:388,n:'双护·累计保底2888W'}},
+'潮汐监狱':{'体验':{p:99,n:'双护·累计保底788W'},'标准':{p:198,n:'双护·累计保底1488W'},'高级':{p:288,n:'双护·累计保底2088W'},'豪华':{p:408,n:'双护·累计保底2888W'}},
+'勇敢者行动':{'体验':{p:488,n:'累计保底888W(带密钥)'}},
+'赌单局撤离':{'体验':{p:300,n:'单局撤出1000W'},'标准':{p:488,n:'单局撤出1100W'},'高级':{p:588,n:'单局撤出1200W'},'豪华':{p:688,n:'单局撤出1300W'}},
+'体验单':{'体验':{p:99,n:'一人一次·巴克什·保底888W'}},'趣味单':{},
+'陪玩价格':{'文宝宝':{p:40,n:'单陪'},'文哥':{p:60,n:'单陪'},'文叔':{p:80,n:'单陪'},'文神':{p:140,n:'单陪'},'双陪':{p:280,n:'双陪 · 统一价'}}
+};
+const CAT=[{k:'护航单',n:'护航单',d:'保底护航'},{k:'潮汐监狱',n:'潮汐监狱',d:'高强度护航'},{k:'勇敢者行动',n:'勇敢者行动',d:'带密钥清图'},{k:'赌单局撤离',n:'赌单局撤离',d:'一局定胜负'},{k:'体验单',n:'体验单',d:'新老板专属'},{k:'趣味单',n:'趣味单',d:'特色玩法·待更新'},{k:'陪玩价格',n:'陪玩价格',d:'按小时下单'}];
+const tL={体验:'基础',标准:'标准',高级:'高级',豪华:'豪华'};
+// ⚠️ 优惠券配置（老大自己维护：满减=threshold+amount，折扣=rate，maxUse=总可用次数）
+const COUPONS={'WG88':{type:'discount',rate:0.88,note:'全场 88 折',maxUse:999},'MAN300':{type:'reduce',threshold:300,amount:50,note:'满 300 减 50',maxUse:999}};
+const CR=[{n:'小陈',s:5,o:56,t:['🎤声控','💕氛围组','😊脾气好'],v:false},{n:'阿豪',s:5,o:42,t:['🔥技术','🎯战术大师','🏆胜率'],v:false},{n:'大鹏',s:5,o:38,t:['😂相声','🌙夜猫','⭐六边形'],v:false},{n:'阿杰',s:4,o:29,t:['🫶耐心','📚导师','🎙️声控'],v:false},{n:'老李',s:4,o:21,t:['🤝安全感','👑老江湖','✅稳'],v:false},{n:'小宇',s:5,o:18,t:['💃气氛','⚡秒回','🎮老炮'],v:false},];
+const SL=[{b:'bg1',b2:'🛡️护航单 ¥98起',s2:'双护稳定保底·累计788W',t2:'🔥热门',e:'🛡️'},{b:'bg2',b2:'✨新老板体验 ¥99',s2:'一人一次·巴克什·保底888W',t2:'🎁新人',e:'✨'},{b:'bg3',b2:'💪勇敢者行动 ¥488',s2:'带密钥清图·保底888W',t2:'💎高端',e:'🔫'},{b:'bg4',b2:'🎲赌单局撤离 ¥300起',s2:'一局定胜负·1000W起',t2:'🎯刺激',e:'🎲'}];
+
+let O=[],nid=1,ca=[],cf='all',af='all',tid=null,adm=false,cix=0,tmr=null,cur=0,curTab='home';
+
+function ld(){try{const r=localStorage.getItem('wv6');if(r){const d=JSON.parse(r);O=d.orders||[];nid=d.nid||(O.length?Math.max(...O.map(o=>o.id))+1:1)}}catch(e){}}
+function sv(){localStorage.setItem('wv6',JSON.stringify({orders:O,nid}))}
+
+function rCar(){const i=document.getElementById('ci'),d=document.getElementById('cd');i.innerHTML=SL.map(s=>`<div class="carousel-slide ${s.b}"><span class="tag">${s.t2}</span><div class="big">${s.b2}</div><div class="small">${s.s2}</div><div class="emoji-bg" style="position:absolute;font-size:70px;opacity:.1;right:-8px;bottom:-12px;transform:rotate(-10deg)">${s.e}</div></div>`).join('');d.innerHTML=SL.map((_,i)=>`<span class="${i===cix?'active':''}" onclick="gs(${i})"></span>`).join('');uCar();startC();}
+function gs(i){cix=i;uCar();startC()}
+function uCar(){const i=document.getElementById('ci'),d=document.getElementById('cd');if(i)i.style.transform=`translateX(-${cix*100}%)`;if(d)d.querySelectorAll('span').forEach((s,j)=>s.classList.toggle('active',j===cix))}
+function startC(){if(tmr)clearInterval(tmr);tmr=setInterval(()=>{cix=(cix+1)%SL.length;uCar()},4000)}
+
+function rMenu(){const l=document.getElementById('ol'),r=document.getElementById('or');l.innerHTML=CAT.map((c,i)=>`<div class="order-cat ${i===cur?'active':''}" onclick="sel(${i})">${c.n}</div>`).join('');renderI(cur)}
+function sel(i){cur=i;document.querySelectorAll('.order-cat').forEach((e,j)=>e.classList.toggle('active',j===i));renderI(i)}
+function pPlayHtml(){const rows=[['文宝宝',40],['文哥',60],['文叔',80],['文神',140],['双陪',280]];return `<div class="food-grid">${rows.map(x=>`<div class="food-card"><div class="fimg" style="font-size:20px;font-weight:700;color:#c9c9cf">${x[0]}</div><div class="finfo"><div class="fnm">陪玩<span class="fp">¥${x[1]}/时</span></div><div class="fdesc">${x[0]==='双陪'?'双陪 · 统一价':'单陪 · 每小时'}</div><div class="fbtns"><span class="fsales"></span><button class="addb" onclick="addC('陪玩价格','${x[0]}')">+</button></div></div></div>`).join('')}</div><div class="ptable-note" style="margin-top:10px"><strong>人头数说明（每小时）：</strong>文哥 5 人 · 文叔 7 人 · 文神 9 人（待确认）· 文宝宝 待定。<br><strong>双陪：</strong>两位陪玩同时带（一队三人），统一价 ¥280/小时。<br>下单方式：点卡片上的 + 号，点一次 = 1 小时。</div>`}
+function renderI(idx){const r=document.getElementById('or');const c=CAT[idx];if(c.k==='陪玩价格'){r.innerHTML=pPlayHtml();return}const p=PT[c.k];if(!p||!Object.keys(p).length){r.innerHTML=`<div class="empty" style="padding:50px 10px"><div class="ic"></div><p>趣味单待添加</p><p style="font-size:10px;color:#ccc">联系管理员</p></div>`;return}
+const tks=Object.keys(p);
+r.innerHTML=`<div class="food-grid">${tks.map(tk=>{const it=p[tk];return `<div class="food-card"><div class="fimg" style="font-size:20px;font-weight:700;color:#c9c9cf">${tL[tk]||tk}</div><div class="finfo"><div class="fnm">${c.n}<span class="fp">¥${it.p}</span></div><div class="fdesc">${tL[tk]||tk} · ${it.n}</div><div class="fbtns"><span class="fsales"></span><button class="addb" onclick="addC('${c.k}','${tk}')">+</button></div></div></div>`}).join('')}</div>`}
+
+function addC(ck,tk){const p=PT[ck]&&PT[ck][tk];if(!p){toast('暂不可用');return}const ex=ca.find(c=>c.category===ck&&c.tier===tk);if(ex){ex.qty=(ex.qty||1)+1}else{ca.push({category:ck,tier:tk,price:p.p,desc:p.n,qty:1})}uCart();toast(ck==='陪玩价格'?'已添加 1 小时':'已添加')}
+function uCart(){const b=document.getElementById('cartBar');if(adm||curTab!=='order'||!ca.length){b.style.display='none';return}b.style.display='flex';const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0),n=ca.reduce((s,c)=>s+(c.qty||1),0);document.getElementById('ccnt').textContent=n;document.getElementById('ctot').textContent='¥'+t}
+function rp(){const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0);document.getElementById('cplist').innerHTML=ca.map((c,i)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">${c.category}·${tL[c.tier]||c.tier}</div><div style="font-size:10px;color:var(--text2)">${c.category==='陪玩价格'?((c.qty||1)+' 小时 · '):''}${c.desc}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="qtyctl"><button onclick="adj(${i},-1)">−</button><span>${c.qty||1}</span><button onclick="adj(${i},1)">+</button></div><div style="font-size:14px;font-weight:700;color:var(--accent);min-width:52px;text-align:right">¥${c.price*(c.qty||1)}</div><button style="width:22px;height:22px;border-radius:50%;border:none;background:var(--card2,#fafafa);color:var(--text2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center" onclick="rc(${i})">✕</button></div></div>`).join('');document.getElementById('cpt').textContent=t}
+function tc(){if(!ca.length){toast('购物车为空');return}const p=document.getElementById('cp2'),o=document.getElementById('co2');if(p.classList.contains('show')){p.classList.remove('show');o.classList.remove('show');return}rp();p.classList.add('show');o.classList.add('show')}
+function adj(i,d){const c=ca[i];if(!c)return;c.qty=(c.qty||1)+d;if(c.qty<1)c.qty=1;uCart();rp()}
+function rc(i){ca.splice(i,1);uCart();rp()}
+function cc2(){ca=[];uCart();rp()}
+let payTotal=0,payFinal=0,payMethod='wx',curCoupon=null,checkInfo={},carryOn=0,selCarry='';
+function calcTotals(){const orig=ca.reduce((s,c)=>s+c.price*(c.qty||1),0);let d=0;if(curCoupon){if(curCoupon.type==='discount')d=Math.round(orig*(1-curCoupon.rate)*100)/100;else if(orig>=curCoupon.threshold)d=curCoupon.amount}return{orig:orig,d:d,pay:Math.max(0,orig-d)}}
+function renderCheck(){
+  const t=calcTotals();
+  document.getElementById('coItems').innerHTML=ca.map(c=>`<div class="chk-row"><span class="nm">${c.category}·${tL[c.tier]||c.tier}${c.qty>1?(c.category==='陪玩价格'?' · '+c.qty+'小时':' ×'+c.qty):''}</span><span class="pr">¥${c.price*(c.qty||1)}</span></div>`).join('')+`<div class="chk-row"><span class="nm" style="color:var(--text)">合计</span><span class="pr" style="color:var(--accent)">¥${t.pay}${t.d>0?' <span style="text-decoration:line-through;color:#bbb;font-weight:400">¥'+t.orig+'</span>':''}</span></div>`;
+  renderCarryList();
+  renderCheckTotals();
+}
+function renderCheckTotals(){const t=calcTotals();document.getElementById('coTotal').innerHTML=t.d>0?'¥'+t.pay+' <span style="text-decoration:line-through;color:#bbb;font-size:12px;font-weight:400">¥'+t.orig+'</span>':'¥'+t.orig}
+function renderCarryList(){const l=document.getElementById('coCarryList');if(!l)return;l.innerHTML=CR.map(x=>`<div class="carry-pick-item ${selCarry===x.n?'sel':''}" onclick="chooseCarry('${x.n}')"><div class="cpa">${x.n[0]}</div><div class="cpn"><div class="t">${x.n}<span class="stars"> ${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span></div><div class="s">${x.t.slice(0,2).join(' · ')}</div></div></div>`).join('')}
+function pickCarry(on){carryOn=on;document.getElementById('cpk-no').classList.toggle('active',!on);document.getElementById('cpk-yes').classList.toggle('active',!!on);document.getElementById('coCarryBox').style.display=on?'block':'none'}
+function chooseCarry(n){selCarry=n;renderCarryList()}
+function applyCoupon(){
+  const code=(document.getElementById('coCoupon').value||'').trim().toUpperCase();
+  const msg=document.getElementById('coCouponMsg');
+  if(!code){curCoupon=null;msg.innerHTML='';renderCheckTotals();return}
+  const c=COUPONS[code];
+  const use=JSON.parse(localStorage.getItem('wv6couponuse')||'{}');
+  if(!c){curCoupon=null;msg.innerHTML='<span style="color:var(--accent)">❌ 券码无效</span>';renderCheckTotals();return}
+  if((use[code]||0)>=(c.maxUse||999)){curCoupon=null;msg.innerHTML='<span style="color:var(--accent)">❌ 该券已用完</span>';renderCheckTotals();return}
+  curCoupon={code:code,type:c.type,rate:c.rate,threshold:c.threshold,amount:c.amount,note:c.note};
+  const t=calcTotals();
+  if(c.type==='reduce'&&t.orig<c.threshold){curCoupon=null;msg.innerHTML='<span style="color:var(--accent)">❌ 未满 ¥'+c.threshold+' 不可用</span>';renderCheckTotals();return}
+  msg.innerHTML='<span style="color:#00b894">✅ '+c.note+' 已生效，立减 ¥'+t.d+'</span>';
+  renderCheckTotals();
+}
+function submitCheck(){
+  const g=document.getElementById('coGameId').value.trim();
+  const w=document.getElementById('coWechat').value.trim();
+  const p=document.getElementById('coPhone').value.trim();
+  if(!g){toast('请填写游戏ID');return}
+  if(!w){toast('请填写微信号');return}
+  if(!p){toast('请填写手机号');return}
+  if(!/^\d{6,15}$/.test(p)){toast('手机号格式不对（6-15位数字）');return}
+  if(carryOn&&!selCarry){toast('请选择要指定的打手');return}
+  checkInfo={gameId:g,wechat:w,phone:p,carry:carryOn?selCarry:'',coupon:curCoupon?curCoupon.code:'',note:document.getElementById('coNote').value.trim()};
+  const t=calcTotals();payTotal=t.orig;payFinal=t.pay;
+  renderPay();swCust('pay');
+}
+function logCoupon(){
+  if(!curCoupon)return;
+  try{
+    const use=JSON.parse(localStorage.getItem('wv6couponuse')||'{}');use[curCoupon.code]=(use[curCoupon.code]||0)+1;localStorage.setItem('wv6couponuse',JSON.stringify(use));
+    const log=JSON.parse(localStorage.getItem('wv6couponlog')||'[]');log.push({code:curCoupon.code,note:curCoupon.note,discount:payTotal-payFinal,wechat:checkInfo.wechat||'',no:document.getElementById('okNo').textContent,time:new Date().toLocaleString('zh-CN')});localStorage.setItem('wv6couponlog',JSON.stringify(log));
+  }catch(e){}
+}
+function sc(){if(!ca.length)return;renderCheck();swCust('check')}
+function renderPay(){
+  document.getElementById('paySum').innerHTML=ca.map(c=>`<div class="row"><span class="nm">${c.category}·${tL[c.tier]||c.tier}${c.qty>1?(c.category==='陪玩价格'?' · '+c.qty+'小时':' ×'+c.qty):''}</span><span class="pr">¥${c.price*(c.qty||1)}</span></div>`).join('')+`<div class="divider"></div><div class="row"><span class="nm">商品合计</span><span class="pr">¥${payTotal}</span></div>`+(payFinal<payTotal?`<div class="row"><span class="nm" style="color:#00b894">优惠券 ${checkInfo.coupon||''}</span><span class="pr" style="color:#00b894">-¥${payTotal-payFinal}</span></div>`:'')+`<div class="row"><span class="nm" style="font-weight:700">应付金额</span><span class="pr" style="font-weight:800;color:var(--accent);font-size:18px">¥${payFinal}</span></div>`;
+  document.getElementById('payAmt').textContent='¥'+payFinal;
+  const bal=walletBal();document.getElementById('walletBal').textContent='余额 ¥'+bal.toFixed(2);
+  document.getElementById('pm-wallet').classList.toggle('disabled',bal<payFinal);
+  if(payMethod==='wallet'&&bal<payFinal)payMethod='wx';
+  selPay(payMethod);
+}
+function walletBal(){return Number(localStorage.getItem('wv6wallet')||0)}
+function selPay(m){payMethod=m;['wx','ali','wallet'].forEach(k=>{const el=document.getElementById('pm-'+k);if(el)el.classList.toggle('selected',k===m)});document.getElementById('payBtn').textContent='确认支付'}
+function backFromPay(){swCust('check')}
+function confirmPay(){
+  const btn=document.getElementById('payBtn');
+  if(btn.disabled)return;
+  if(payMethod==='wallet'&&walletBal()<payFinal){toast('余额不足，请选择其他支付方式');return}
+  btn.disabled=true;btn.textContent='支付中...';
+  setTimeout(()=>{
+    const no='WG'+String(Date.now()).slice(-8);
+    document.getElementById('okNo').textContent=no;
+    document.getElementById('okPay').textContent={wx:'微信支付',ali:'支付宝',wallet:'钱包支付'}[payMethod];
+    document.getElementById('okAmt').textContent='¥'+payFinal;
+    document.getElementById('mOk').classList.add('show');
+    btn.disabled=false;btn.textContent='确认支付';
+  },900);
+}
+function payDone(){
+  document.getElementById('mOk').classList.remove('show');
+  O.push({id:nid++,items:[...ca],total:payFinal,orig:payTotal,gameId:checkInfo.gameId||'',wechat:checkInfo.wechat||'',phone:checkInfo.phone||'',carry:checkInfo.carry||'',coupon:curCoupon?curCoupon.code:'',couponDisc:payTotal-payFinal,note:checkInfo.note||'',payMethod:payMethod,payNo:document.getElementById('okNo').textContent,status:'pending',customer:'我',createdAt:new Date().toLocaleString('zh-CN')});
+  if(payMethod==='wallet')localStorage.setItem('wv6wallet',(walletBal()-payFinal).toFixed(2));
+  logCoupon();
+  ca=[];curCoupon=null;checkInfo={};uCart();tc();sv();rAll();toast('✅ 支付成功，下单完成！');swCust('myorders')
+}
+
+function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);const b=c.o>=40?'🔥人气':c.o>=20?'⭐认证':'🌱新晋';return `<div class="food-card"><div class="fimg" style="font-size:28px">${c.n[0]}<span style="position:absolute;top:6px;left:6px;font-size:8px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#fff">${b}</span></div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${c.t.map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">完成 ${c.o} 单</div></div></div>`};document.getElementById('ccount').textContent=CR.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${CR.map(h).join('')}</div>`}
+
+function swCust(t){if(adm)return;curTab=t;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const pm={home:'ch',order:'corder',carries:'cc',myorders:'cmy',profile:'cp',faq:'cfaq',pay:'cpay',check:'ccheck'};const e=document.getElementById(pm[t]||('c'+t));if(e)e.classList.add('active');document.body.classList.toggle('pay-mode',t==='pay');document.getElementById('ctab').style.display=t==='pay'?'none':'flex';if(['home','order','carries','myorders','profile'].indexOf(t)>=0){document.querySelectorAll('#ctab .tab-item').forEach(x=>x.classList.remove('active'));const i=['home','order','carries','myorders','profile'].indexOf(t);const el=document.querySelector(`#ctab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active')}uCart();rAll()}
+function swRole(r){document.querySelectorAll('.r-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.r-btn[data-r="${r}"]`).classList.add('active');adm=r==='admin';document.getElementById('ctab').style.display=adm?'none':'flex';document.getElementById('atab').style.display=adm?'flex':'none';if(adm){document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));document.getElementById('alogin').classList.add('active')}else{curTab='home';document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));document.getElementById('ch').classList.add('active');document.querySelectorAll('#ctab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#ctab .tab-item:first-child').classList.add('active')}uCart();rAll()}
+function al(){if(document.getElementById('apw').value==='admin123'){document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));document.getElementById('adash').classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#atab .tab-item:first-child').classList.add('active');rAll();toast('✅登录成功')}else toast('❌密码错误')}
+function swAdmin(t){document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const e=document.getElementById('a'+({dashboard:'dash',orders:'orders',stats:'stats'}[t]||t));if(e)e.classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(tl=>tl.classList.remove('active'));const i=['dashboard','orders','stats'].indexOf(t);const el=document.querySelector(`#atab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active');rAll()}
+
+function fc(f){cf=f;document.querySelectorAll('#cof .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===f));rCust()}
+function fa(f){af=f;const v=['all','pending','active','paused','done','rejected'];document.querySelectorAll('#aot .atab').forEach((e,i)=>e.classList.toggle('active',v[i]===f));rAdmO()}
+
+const SM={pending:{l:'待接单',c:'sp'},active:{l:'进行中',c:'sa'},paused:{l:'存单',c:'ss'},done:{l:'已完成',c:'sd'},rejected:{l:'已拒绝',c:'sr'}};
+
+function rHome(){
+  const m=O.filter(o=>o.customer==='我');
+  document.getElementById('hSettled').textContent=m.filter(o=>o.status==='done').reduce((s,o)=>s+(o.total||0),0);
+  document.getElementById('hActive').textContent=m.filter(o=>o.status==='active').length;
+  document.getElementById('hTotal').textContent=m.length;
+}
+function itName(i){if(!i)return'订单';if(i.category==='陪玩价格')return '陪玩·'+i.tier+(i.qty>1?('·'+i.qty+'小时'):'');return i.category+'('+(tL[i.tier]||i.tier)+')'+(i.qty>1?'×'+i.qty:'')}
+function rHotCarries(){
+  const el=document.getElementById('hCarries');
+  if(!el)return;
+  const top=CR.slice().sort((a,b)=>b.o-a.o).slice(0,8);
+  el.innerHTML=`<div class="h-scroll">${top.map(c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="h-carry" onclick="swCust('carries')"><div class="ava">${c.n[0]}</div><div class="nm">${c.n}</div><div class="stars">${s}</div><div class="tag2">${c.t.slice(0,2).join(' · ')}</div></div>`}).join('')}</div>`
+}
+let onlineN=18;
+function rOnline(){const el=document.getElementById('hOnline');if(el)el.textContent=onlineN}
+setInterval(()=>{onlineN=Math.max(8,Math.min(66,onlineN+Math.floor(Math.random()*9)-4));rOnline()},3000);
+function rAll(){rHome();rCust();rPro();rDash();rAdmO();rStats()}
+
+function rCust(){const el=document.getElementById('col');let l=O.filter(o=>o.customer==='我').sort((a,b)=>b.id-a.id);if(cf!=='all')l=l.filter(o=>o.status===cf);if(!l.length){el.innerHTML='<div class="empty"><div class="ic">📭</div><p>暂无订单</p></div>';return}el.innerHTML=l.map(o=>{const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';return `<div class="order-card"><div class="top"><div class="svc">${its}</div><span class="st ${si.c}">${si.l}</span></div>${o.note?`<div class="desc">📝${o.note}</div>`:''}<div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div></div>`}).join('')}
+function rPro(){const m=O.filter(o=>o.customer==='我');document.getElementById('pwSettled').textContent=m.filter(o=>o.status==='done').reduce((s,o)=>s+(o.total||0),0);document.getElementById('pwActiveP').textContent=m.filter(o=>o.status==='active').length;document.getElementById('pwTotalP').textContent=m.length;document.getElementById('pwDoneP').textContent=m.filter(o=>o.status==='done').length}
+
+function bCard(o){const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';let ac='';if(o.status==='pending')ac=`<div class="actions"><button class="ba" onclick="oA(${o.id})">✅接单</button><button class="bo" onclick="oR(${o.id})">🚫拒绝</button></div>`;else if(o.status==='active')ac=`<div class="actions"><button class="bg" onclick="oS(${o.id})">💰结账</button><button class="by" onclick="oP(${o.id})">⏸️存单</button></div>`;else if(o.status==='paused')ac=`<div class="actions"><button class="bg" onclick="oRs(${o.id})">▶️恢复</button><button class="bo" onclick="oS(${o.id})">💰结账</button></div>`;return `<div class="order-card"><div class="top"><div class="svc">#${o.id} ${its} <small>👤${o.customer||'?'}</small></div><span class="st ${si.c}">${si.l}</span></div><div class="desc">📞${o.wechat||o.contact||'无'}${o.phone?' · '+o.phone:''}${o.gameId?' · 🎮'+o.gameId:''}${o.carry?' · 🎯指定'+o.carry:''}${o.coupon?' · 🎟️'+o.coupon:''}${o.note?' · '+o.note:''}</div><div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${ac}</div>`}
+function rAdmO(){const el=document.getElementById('aol');let l=O.slice().sort((a,b)=>b.id-a.id);if(af!=='all')l=l.filter(o=>o.status===af);el.innerHTML=l.length?l.map(bCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无</p></div>'}
+function rDash(){const p=O.filter(o=>o.status==='pending').length,a=O.filter(o=>o.status==='active').length,ps=O.filter(o=>o.status==='paused').length,st=O.filter(o=>o.status==='done').reduce((s,o)=>s+(o.total||0),0);document.getElementById('ato').textContent=O.length;document.getElementById('aao').textContent=a;document.getElementById('asa').textContent='¥'+st.toFixed(0);document.getElementById('apo').textContent=ps;const el=document.getElementById('app');const l=O.filter(o=>o.status==='pending').sort((a,b)=>b.id-a.id).slice(0,3);el.innerHTML=l.length?l.map(bCard).join(''):'<div class="empty" style="padding:12px"><p>✅暂无待处理</p></div>'}
+function rStats(){document.getElementById('asP').textContent=O.filter(o=>o.status==='pending').length;document.getElementById('asA').textContent=O.filter(o=>o.status==='active').length;document.getElementById('asS').textContent=O.filter(o=>o.status==='paused').length;document.getElementById('asD').textContent=O.filter(o=>o.status==='done').length}
+
+function oA(id){tid=id;document.getElementById('mAc').classList.add('show')}
+function cAc(){const o=O.find(x=>x.id===tid);if(o){o.status='active';sv();rAll();toast('✅已接单')}cm('mAc')}
+function oS(id){tid=id;const o=O.find(x=>x.id===id);document.getElementById('sP').textContent='¥'+(o?o.total||0:0);document.getElementById('mSt').classList.add('show')}
+function cSt(){const o=O.find(x=>x.id===tid);if(o){o.status='done';sv();rAll();toast('💰已结账')}cm('mSt')}
+function oR(id){tid=id;document.getElementById('mRj').classList.add('show')}
+function cRj(){const o=O.find(x=>x.id===tid);if(o){o.status='rejected';sv();rAll();toast('🚫已拒绝')}cm('mRj')}
+function oP(id){tid=id;document.getElementById('mPs').classList.add('show')}
+function cP(){const o=O.find(x=>x.id===tid);if(o){o.status='paused';sv();rAll();toast('⏸️已存单')}cm('mPs')}
+function oRs(id){tid=id;document.getElementById('mRs').classList.add('show')}
+function cRs(){const o=O.find(x=>x.id===tid);if(o){o.status='active';sv();rAll();toast('▶️已恢复')}cm('mRs')}
+function cPs(){const o=O.find(x=>x.id===tid);if(o){o.status='paused';sv();rAll();toast('⏸️已存单')}cm('mPs')}
+
+function cm(id){document.getElementById(id).classList.remove('show')}
+function tf(el){el.classList.toggle('open')}
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+
+ld();rCar();rMenu();rCarries();rHotCarries();rOnline();rAll();
+</script>
+</body>
+</html>
