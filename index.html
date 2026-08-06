@@ -51,6 +51,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 .order-cat .ci{font-size:22px;display:block;margin-bottom:2px}
 .order-cat.active{background:var(--card);color:var(--accent);font-weight:700;position:relative}
 .order-cat.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:22px;background:var(--accent);border-radius:0 3px 3px 0}
+.order-cat.disabled{opacity:.45;cursor:not-allowed}
 
 .order-right{flex:1;overflow-y:auto;padding:8px 8px 70px}
 .order-right::-webkit-scrollbar{width:0}
@@ -439,9 +440,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
     <div class="section" style="padding-bottom:120px">
       <div class="check-card">
         <div class="f" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:12px"><label>🧾 订单明细</label><div id="coItems"></div></div>
-        <div class="f"><label>🎮 游戏ID（三角洲UID / 游戏ID）<em>*</em></label><input id="coGameId" placeholder="必填" maxlength="32"></div>
+        <div class="f"><label>🎮 游戏ID（三角洲UID / 游戏ID）<em>*</em></label><input id="coGameId" placeholder="请输入游戏ID" maxlength="32"></div>
         <div class="f"><label>💬 微信号<em>*</em></label><input id="coWechat" placeholder="请输入微信号" maxlength="32"></div>
-        <div class="f"><label>📱 手机号<em>*</em></label><input id="coPhone" type="tel" placeholder="紧急联系用" maxlength="15"></div>
+        <div class="f"><label>📱 手机号<em>*</em></label><input id="coPhone" type="tel" placeholder="请输入手机号" maxlength="15"></div>
         <div class="f">
           <label>🎯 指定打手</label>
           <div class="pick-row">
@@ -454,11 +455,13 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
           <div class="carry-pick" id="coCarryList"></div>
         </div>
         <div class="f">
-          <label>🎟️ 优惠券</label>
-          <div class="coupon-row"><input id="coCoupon" placeholder="输入优惠券码" maxlength="20"><button class="coupon-btn" onclick="applyCoupon()">使用</button></div>
-          <div id="coCouponMsg" style="font-size:10px;margin-top:5px;min-height:14px"></div>
+          <label style="cursor:pointer;display:flex;align-items:center;gap:4px" onclick="toggleCoupon()">🎟️ 优惠券<span id="coCouponArrow" style="font-size:12px;color:var(--text2);transition:transform .2s;display:inline-block">›</span></label>
+          <div id="coCouponBox" style="display:none">
+            <div class="coupon-row"><input id="coCoupon" placeholder="输入优惠券码" maxlength="20"><button class="coupon-btn" onclick="applyCoupon()">使用</button></div>
+            <div id="coCouponMsg" style="font-size:10px;margin-top:5px;min-height:14px"></div>
+          </div>
         </div>
-        <div class="f" style="margin-bottom:0"><label>📝 备注</label><textarea id="coNote" placeholder="想几点打？有什么要求？"></textarea></div>
+        <div class="f" style="margin-bottom:0"><label>📝 备注</label><textarea id="coNote" placeholder="选填"></textarea></div>
       </div>
     </div>
     <div class="pay-foot">
@@ -585,7 +588,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
       <div><span>支付金额</span><b id="okAmt" style="color:var(--accent)">¥0</b></div>
     </div>
   </div>
-  <div class="btn-row"><button class="ba" onclick="payDone()">完成</button></div>
+  <div class="btn-row"><button class="bo" onclick="reOrderLast()">🔄 再来一单</button><button class="ba" onclick="payDone()">完成</button></div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -616,7 +619,7 @@ function gs(i){cix=i;uCar();startC()}
 function uCar(){const i=document.getElementById('ci'),d=document.getElementById('cd');if(i)i.style.transform=`translateX(-${cix*100}%)`;if(d)d.querySelectorAll('span').forEach((s,j)=>s.classList.toggle('active',j===cix))}
 function startC(){if(tmr)clearInterval(tmr);tmr=setInterval(()=>{cix=(cix+1)%SL.length;uCar()},4000)}
 
-function rMenu(){const l=document.getElementById('ol'),r=document.getElementById('or');l.innerHTML=CAT.map((c,i)=>`<div class="order-cat ${i===cur?'active':''}" onclick="sel(${i})">${c.n}</div>`).join('');renderI(cur)}
+function rMenu(){const l=document.getElementById('ol'),r=document.getElementById('or');l.innerHTML=CAT.map((c,i)=>{const p=PT[c.k];const empty=!p||!Object.keys(p).length;return '<div class="order-cat '+(i===cur?'active':'')+(empty?' disabled':'')+'" onclick="'+(empty?"toast('趣味单 敬请期待')":'sel('+i+')')+'">'+c.n+'</div>'}).join('');renderI(cur)}
 function sel(i){cur=i;document.querySelectorAll('.order-cat').forEach((e,j)=>e.classList.toggle('active',j===i));renderI(i)}
 function pPlayHtml(){const rows=[['文宝宝',40],['文哥',60],['文叔',80],['文神',140],['双陪',280]];return `<div class="food-grid">${rows.map(x=>`<div class="food-card"><div class="fimg" style="font-size:20px;font-weight:700;color:#c9c9cf">${x[0]}</div><div class="finfo"><div class="fnm">陪玩<span class="fp">¥${x[1]}/时</span></div><div class="fdesc">${x[0]==='双陪'?'双陪 · 统一价':'单陪 · 每小时'}</div><div class="fbtns"><span class="fsales"></span><button class="addb" onclick="addC('陪玩价格','${x[0]}')">+</button></div></div></div>`).join('')}</div><div class="ptable-note" style="margin-top:10px"><strong>人头数说明（每小时）：</strong>文哥 5 人 · 文叔 7 人 · 文神 9 人（待确认）· 文宝宝 待定。<br><strong>双陪：</strong>两位陪玩同时带（一队三人），统一价 ¥280/小时。<br>下单方式：点卡片上的 + 号，点一次 = 1 小时。</div>`}
 function renderI(idx){const r=document.getElementById('or');const c=CAT[idx];if(c.k==='陪玩价格'){r.innerHTML=pPlayHtml();return}const p=PT[c.k];if(!p||!Object.keys(p).length){r.innerHTML=`<div class="empty" style="padding:50px 10px"><div class="ic"></div><p>趣味单待添加</p><p style="font-size:10px;color:#ccc">联系管理员</p></div>`;return}
@@ -627,12 +630,13 @@ function addC(ck,tk){const p=PT[ck]&&PT[ck][tk];if(!p){toast('暂不可用');ret
 function uCart(){const b=document.getElementById('cartBar');if(adm||curTab!=='order'||!ca.length){b.style.display='none';return}b.style.display='flex';const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0),n=ca.reduce((s,c)=>s+(c.qty||1),0);document.getElementById('ccnt').textContent=n;document.getElementById('ctot').textContent='¥'+t}
 function rp(){const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0);document.getElementById('cplist').innerHTML=ca.map((c,i)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">${c.category}·${tL[c.tier]||c.tier}</div><div style="font-size:10px;color:var(--text2)">${c.category==='陪玩价格'?((c.qty||1)+' 小时 · '):''}${c.desc}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="qtyctl"><button onclick="adj(${i},-1)">−</button><span>${c.qty||1}</span><button onclick="adj(${i},1)">+</button></div><div style="font-size:14px;font-weight:700;color:var(--accent);min-width:52px;text-align:right">¥${c.price*(c.qty||1)}</div><button style="width:22px;height:22px;border-radius:50%;border:none;background:var(--card2,#fafafa);color:var(--text2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center" onclick="rc(${i})">✕</button></div></div>`).join('');document.getElementById('cpt').textContent=t}
 function tc(){if(!ca.length){toast('购物车为空');return}const p=document.getElementById('cp2'),o=document.getElementById('co2');if(p.classList.contains('show')){p.classList.remove('show');o.classList.remove('show');return}rp();p.classList.add('show');o.classList.add('show')}
-function adj(i,d){const c=ca[i];if(!c)return;c.qty=(c.qty||1)+d;if(c.qty<1)c.qty=1;uCart();rp()}
+function adj(i,d){const c=ca[i];if(!c)return;if(d<0&&(c.qty||1)<=1)return;c.qty=(c.qty||1)+d;uCart();rp()}
 function rc(i){ca.splice(i,1);uCart();rp()}
 function cc2(){ca=[];uCart();rp()}
-let payTotal=0,payFinal=0,payMethod='wx',curCoupon=null,checkInfo={},carryOn=0,selCarry='';
+let payTotal=0,payFinal=0,payMethod='wx',curCoupon=null,checkInfo={},carryOn=0,selCarry='',lastItems=[];
 function calcTotals(){const orig=ca.reduce((s,c)=>s+c.price*(c.qty||1),0);let d=0;if(curCoupon){if(curCoupon.type==='discount')d=Math.round(orig*(1-curCoupon.rate)*100)/100;else if(orig>=curCoupon.threshold)d=curCoupon.amount}return{orig:orig,d:d,pay:Math.max(0,orig-d)}}
 function renderCheck(){
+  ldInfo();
   const t=calcTotals();
   document.getElementById('coItems').innerHTML=ca.map(c=>`<div class="chk-row"><span class="nm">${c.category}·${tL[c.tier]||c.tier}${c.qty>1?(c.category==='陪玩价格'?' · '+c.qty+'小时':' ×'+c.qty):''}</span><span class="pr">¥${c.price*(c.qty||1)}</span></div>`).join('')+`<div class="chk-row"><span class="nm" style="color:var(--text)">合计</span><span class="pr" style="color:var(--accent)">¥${t.pay}${t.d>0?' <span style="text-decoration:line-through;color:#bbb;font-weight:400">¥'+t.orig+'</span>':''}</span></div>`;
   renderCarryList();
@@ -694,6 +698,7 @@ function confirmPay(){
   if(payMethod==='wallet'&&walletBal()<payFinal){toast('余额不足，请选择其他支付方式');return}
   btn.disabled=true;btn.textContent='支付中...';
   setTimeout(()=>{
+    lastItems=ca.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));
     const no='WG'+String(Date.now()).slice(-8);
     document.getElementById('okNo').textContent=no;
     document.getElementById('okPay').textContent={wx:'微信支付',ali:'支付宝',wallet:'钱包支付'}[payMethod];
@@ -705,6 +710,7 @@ function confirmPay(){
 function payDone(){
   document.getElementById('mOk').classList.remove('show');
   O.push({id:nid++,items:[...ca],total:payFinal,orig:payTotal,gameId:checkInfo.gameId||'',wechat:checkInfo.wechat||'',phone:checkInfo.phone||'',carry:checkInfo.carry||'',coupon:curCoupon?curCoupon.code:'',couponDisc:payTotal-payFinal,note:checkInfo.note||'',payMethod:payMethod,payNo:document.getElementById('okNo').textContent,status:'pending',customer:'我',createdAt:new Date().toLocaleString('zh-CN')});
+  svInfo();
   if(payMethod==='wallet')localStorage.setItem('wv6wallet',(walletBal()-payFinal).toFixed(2));
   logCoupon();
   ca=[];curCoupon=null;checkInfo={};uCart();tc();sv();rAll();toast('✅ 支付成功，下单完成！');swCust('myorders')
@@ -740,7 +746,7 @@ function rOnline(){const el=document.getElementById('hOnline');if(el)el.textCont
 setInterval(()=>{onlineN=Math.max(8,Math.min(66,onlineN+Math.floor(Math.random()*9)-4));rOnline()},3000);
 function rAll(){rHome();rCust();rPro();rDash();rAdmO();rStats()}
 
-function rCust(){const el=document.getElementById('col');let l=O.filter(o=>o.customer==='我').sort((a,b)=>b.id-a.id);if(cf!=='all')l=l.filter(o=>o.status===cf);if(!l.length){el.innerHTML='<div class="empty"><div class="ic">📭</div><p>暂无订单</p></div>';return}el.innerHTML=l.map(o=>{const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';return `<div class="order-card"><div class="top"><div class="svc">${its}</div><span class="st ${si.c}">${si.l}</span></div>${o.note?`<div class="desc">📝${o.note}</div>`:''}<div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div></div>`}).join('')}
+function rCust(){const el=document.getElementById('col');let l=O.filter(o=>o.customer==='我').sort((a,b)=>b.id-a.id);if(cf!=='all')l=l.filter(o=>o.status===cf);if(!l.length){el.innerHTML='<div class="empty"><div class="ic">📭</div><p>暂无订单</p></div>';return}el.innerHTML=l.map(o=>{const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';return `<div class="order-card"><div class="top"><div class="svc">${its}</div><span class="st ${si.c}">${si.l}</span></div>${o.note?`<div class="desc">📝${o.note}</div>`:''}<div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${o.status==='done'?`<div class="actions"><button class="ba" onclick="reOrder(${o.id})">🔄 再来一单</button></div>`:''}</div>`}).join('')}
 function rPro(){const m=O.filter(o=>o.customer==='我');document.getElementById('pwSettled').textContent=m.filter(o=>o.status==='done').reduce((s,o)=>s+(o.total||0),0);document.getElementById('pwActiveP').textContent=m.filter(o=>o.status==='active').length;document.getElementById('pwTotalP').textContent=m.length;document.getElementById('pwDoneP').textContent=m.filter(o=>o.status==='done').length}
 
 function bCard(o){const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';let ac='';if(o.status==='pending')ac=`<div class="actions"><button class="ba" onclick="oA(${o.id})">✅接单</button><button class="bo" onclick="oR(${o.id})">🚫拒绝</button></div>`;else if(o.status==='active')ac=`<div class="actions"><button class="bg" onclick="oS(${o.id})">💰结账</button><button class="by" onclick="oP(${o.id})">⏸️存单</button></div>`;else if(o.status==='paused')ac=`<div class="actions"><button class="bg" onclick="oRs(${o.id})">▶️恢复</button><button class="bo" onclick="oS(${o.id})">💰结账</button></div>`;return `<div class="order-card"><div class="top"><div class="svc">#${o.id} ${its} <small>👤${o.customer||'?'}</small></div><span class="st ${si.c}">${si.l}</span></div><div class="desc">📞${o.wechat||o.contact||'无'}${o.phone?' · '+o.phone:''}${o.gameId?' · 🎮'+o.gameId:''}${o.carry?' · 🎯指定'+o.carry:''}${o.coupon?' · 🎟️'+o.coupon:''}${o.note?' · '+o.note:''}</div><div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${ac}</div>`}
@@ -761,8 +767,14 @@ function cRs(){const o=O.find(x=>x.id===tid);if(o){o.status='active';sv();rAll()
 function cPs(){const o=O.find(x=>x.id===tid);if(o){o.status='paused';sv();rAll();toast('⏸️已存单')}cm('mPs')}
 
 function cm(id){document.getElementById(id).classList.remove('show')}
+function ldInfo(){try{const r=JSON.parse(localStorage.getItem('wv6info')||'{}');const g=document.getElementById('coGameId'),w=document.getElementById('coWechat'),p=document.getElementById('coPhone');if(g&&r.gameId)g.value=r.gameId;if(w&&r.wechat)w.value=r.wechat;if(p&&r.phone)p.value=r.phone}catch(e){}}
+function svInfo(){try{localStorage.setItem('wv6info',JSON.stringify({gameId:document.getElementById('coGameId').value.trim(),wechat:document.getElementById('coWechat').value.trim(),phone:document.getElementById('coPhone').value.trim()}))}catch(e){}}
+function toggleCoupon(){const b=document.getElementById('coCouponBox'),a=document.getElementById('coCouponArrow');const open=b.style.display!=='none';b.style.display=open?'none':'block';a.style.transform=open?'rotate(0deg)':'rotate(90deg)'}
+function reOrder(id){const o=O.find(x=>x.id===id);if(!o||!o.items)return;ca=o.items.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));uCart();swCust('order');toast('已加入购物车')}
+function reOrderLast(){cm('mOk');payDone();ca=lastItems.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));uCart();swCust('order');toast('已加入购物车')}
 function tf(el){el.classList.toggle('open')}
-function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+let toastT=null;
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');if(toastT)clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200)}
 
 ld();rCar();rMenu();rCarries();rHotCarries();rOnline();rAll();
 </script>
