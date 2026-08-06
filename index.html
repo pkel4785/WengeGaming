@@ -442,7 +442,6 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
         <div class="f" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:12px"><label>🧾 订单明细</label><div id="coItems"></div></div>
         <div class="f"><label>🎮 游戏ID（三角洲UID / 游戏ID）<em>*</em></label><input id="coGameId" placeholder="请输入游戏ID" maxlength="32"></div>
         <div class="f"><label>💬 微信号<em>*</em></label><input id="coWechat" placeholder="请输入微信号" maxlength="32"></div>
-        <div class="f"><label>📱 手机号<em>*</em></label><input id="coPhone" type="tel" placeholder="请输入手机号" maxlength="15"></div>
         <div class="f">
           <label>🎯 指定打手</label>
           <div class="pick-row">
@@ -663,13 +662,10 @@ function applyCoupon(){
 function submitCheck(){
   const g=document.getElementById('coGameId').value.trim();
   const w=document.getElementById('coWechat').value.trim();
-  const p=document.getElementById('coPhone').value.trim();
   if(!g){toast('请填写游戏ID');return}
   if(!w){toast('请填写微信号');return}
-  if(!p){toast('请填写手机号');return}
-  if(!/^\d{6,15}$/.test(p)){toast('手机号格式不对（6-15位数字）');return}
   if(carryOn&&!selCarry){toast('请选择要指定的打手');return}
-  checkInfo={gameId:g,wechat:w,phone:p,carry:carryOn?selCarry:'',coupon:curCoupon?curCoupon.code:'',note:document.getElementById('coNote').value.trim()};
+  checkInfo={gameId:g,wechat:w,phone:'',carry:carryOn?selCarry:'',coupon:curCoupon?curCoupon.code:'',note:document.getElementById('coNote').value.trim()};
   const t=calcTotals();payTotal=t.orig;payFinal=t.pay;
   renderPay();swCust('pay');
 }
@@ -767,8 +763,8 @@ function cRs(){const o=O.find(x=>x.id===tid);if(o){o.status='active';sv();rAll()
 function cPs(){const o=O.find(x=>x.id===tid);if(o){o.status='paused';sv();rAll();toast('⏸️已存单')}cm('mPs')}
 
 function cm(id){document.getElementById(id).classList.remove('show')}
-function ldInfo(){try{const r=JSON.parse(localStorage.getItem('wv6info')||'{}');const g=document.getElementById('coGameId'),w=document.getElementById('coWechat'),p=document.getElementById('coPhone');if(g&&r.gameId)g.value=r.gameId;if(w&&r.wechat)w.value=r.wechat;if(p&&r.phone)p.value=r.phone}catch(e){}}
-function svInfo(){try{localStorage.setItem('wv6info',JSON.stringify({gameId:document.getElementById('coGameId').value.trim(),wechat:document.getElementById('coWechat').value.trim(),phone:document.getElementById('coPhone').value.trim()}))}catch(e){}}
+function ldInfo(){try{const r=JSON.parse(localStorage.getItem('wv6info')||'{}');const g=document.getElementById('coGameId'),w=document.getElementById('coWechat');if(g&&r.gameId)g.value=r.gameId;if(w&&r.wechat)w.value=r.wechat}catch(e){}}
+function svInfo(){try{localStorage.setItem('wv6info',JSON.stringify({gameId:document.getElementById('coGameId').value.trim(),wechat:document.getElementById('coWechat').value.trim()}))}catch(e){}}
 function toggleCoupon(){const b=document.getElementById('coCouponBox'),a=document.getElementById('coCouponArrow');const open=b.style.display!=='none';b.style.display=open?'none':'block';a.style.transform=open?'rotate(0deg)':'rotate(90deg)'}
 function reOrder(id){const o=O.find(x=>x.id===id);if(!o||!o.items)return;ca=o.items.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));uCart();swCust('order');toast('已加入购物车')}
 function reOrderLast(){cm('mOk');payDone();ca=lastItems.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));uCart();swCust('order');toast('已加入购物车')}
