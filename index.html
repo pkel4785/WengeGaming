@@ -844,7 +844,7 @@ function rHotCarries(){
 let onlineN=18;
 function rOnline(){const el=document.getElementById('hOnline');if(el)el.textContent=onlineN}
 setInterval(()=>{onlineN=Math.max(8,Math.min(66,onlineN+Math.floor(Math.random()*9)-4));rOnline()},3000);
-function rAll(){rHome();rCust();rPro();rDash();rAdmO();rStats();if(role==='carrier'&&csess())rCarAll();rAC();rAV()}
+function rAll(){rHome();rCust();rPro();rDash();rAdmO();rStats();rCarries();rHotCarries();if(role==='carrier'&&csess())rCarAll();rAC();rAV()}
 
 function rCust(){const el=document.getElementById('col');let l=O.filter(o=>o.customer==='我').sort((a,b)=>b.id-a.id);if(cf!=='all')l=l.filter(o=>o.status===cf);if(!l.length){el.innerHTML='<div class="empty"><div class="ic">📭</div><p>暂无订单</p></div>';return}el.innerHTML=l.map(o=>{const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';return `<div class="order-card"><div class="top"><div class="svc">${its}</div><span class="st ${si.c}">${si.l}</span></div>${o.note?`<div class="desc">📝${o.note}</div>`:''}<div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${o.status==='done'?`<div class="actions"><button class="ba" onclick="reOrder(${o.id})">🔄 再来一单</button></div>`:''}</div>`}).join('')}
 function rPro(){const m=O.filter(o=>o.customer==='我');document.getElementById('pwSettled').textContent=m.filter(o=>o.status==='done').reduce((s,o)=>s+(o.total||0),0);document.getElementById('pwActiveP').textContent=m.filter(o=>o.status==='active').length;document.getElementById('pwTotalP').textContent=m.length;document.getElementById('pwDoneP').textContent=m.filter(o=>o.status==='done').length}
