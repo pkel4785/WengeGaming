@@ -712,7 +712,7 @@ function sv(){localStorage.setItem('wv6',JSON.stringify({orders:O,nid}))}
 // ===== 打手账号（管理端建号，存 wv6carriers） =====
 let CR2=[];
 function ldCar(){try{const r=localStorage.getItem('wv6carriers');if(r){CR2=JSON.parse(r)}else{CR2=CR.map(x=>({n:x.n,pw:'123456',t:[],avatar:'',voice:'',vStatus:0}));svCar()}}catch(e){CR2=[]}}
-function svCar(){try{localStorage.setItem('wv6carriers',JSON.stringify(CR2))}catch(e){}}
+function svCar(){try{localStorage.setItem('wv6carriers',JSON.stringify(CR2));return true}catch(e){return false}}
 function carList(){const acc={};CR2.forEach(a=>acc[a.n]=a);const out=CR.map(x=>{const a=acc[x.n]||{};return{n:x.n,s:x.s,o:x.o,t:(a.t&&a.t.length)?a.t:x.t,v:x.v,avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0}});CR2.forEach(a=>{if(!CR.some(x=>x.n===a.n))out.push({n:a.n,s:5,o:0,t:a.t||[],v:true,avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0})});return out}
 let pvA=null;
 function pv(n){const a=CR2.find(x=>x.n===n);if(!a||!a.voice)return;if(pvA)pvA.pause();pvA=new Audio(a.voice);pvA.play().catch(()=>{})}
@@ -895,13 +895,13 @@ function dRec(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('当前环境不支持录音');return}
   navigator.mediaDevices.getUserMedia({audio:true}).then(st=>{
     dRecChunks=[];dRecSec=0;
-    dRecM=new MediaRecorder(st);
+    dRecM=new MediaRecorder(st,{audioBitsPerSecond:48000});
     dRecM.ondataavailable=e=>{if(e.data&&e.data.size)dRecChunks.push(e.data)};
     dRecM.onstop=()=>{
       st.getTracks().forEach(t=>t.stop());
       const blob=new Blob(dRecChunks,{type:dRecM.mimeType||'audio/webm'});
       const rd=new FileReader();
-      rd.onload=()=>{dRecUrl=rd.result;const au=document.getElementById('dRecAudio');au.src=dRecUrl;document.getElementById('dRecPrev').style.display='block';document.getElementById('dRecTime').textContent='已录 '+dRecSec+' 秒'};
+      rd.onload=()=>{dRecUrl=rd.result;const au=document.getElementById('dRecAudio');au.src=dRecUrl;document.getElementById('dRecPrev').style.display='block';document.getElementById('dRecTime').textContent='已录 '+dRecSec+' 秒';toast('录音完成，记得点「提交审核」')};
       rd.readAsDataURL(blob);
       dRecM=null;btn.textContent='🎤 开始录音';btn.classList.remove('recording');
     };
@@ -911,7 +911,7 @@ function dRec(){
 }
 function dRecStop(){if(!dRecM)return;try{dRecM.stop()}catch(e){}clearInterval(dRecT)}
 function dRecCancel(){dRecUrl='';document.getElementById('dRecPrev').style.display='none';document.getElementById('dRecTime').textContent='';const au=document.getElementById('dRecAudio');au.pause();au.removeAttribute('src')}
-function dRecSubmit(){if(!dRecUrl){toast('先录音再提交');return}const a=CR2.find(x=>x.n===csess());if(!a)return;a.voice=dRecUrl;a.vStatus=1;svCar();dRecCancel();rDPro();rAC();rAV();toast('✅已提交审核')}
+function dRecSubmit(){if(!dRecUrl){toast('先录音再提交');return}const a=CR2.find(x=>x.n===csess());if(!a)return;a.voice=dRecUrl;a.vStatus=1;if(!svCar()){a.voice='';a.vStatus=0;toast('❌保存失败：语音太大，请录短一点再试');return}dRecCancel();rDPro();rAC();rAV();toast('✅已提交审核')}
 function rCarAll(){rDNew();rDAct();rDHist();rDPro()}
 
 // ===== 管理端：打手账号 + 语音审核 =====
