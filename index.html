@@ -294,6 +294,30 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 .pay-success .sbox{background:var(--card2,#fafafa);border-radius:12px;padding:14px;margin-top:16px;font-size:12px;color:var(--text2)}
 .pay-success .sbox div{display:flex;justify-content:space-between;padding:5px 0}
 .pay-success .sbox b{color:var(--text);font-weight:600}
+
+/* ===== 打手端 ===== */
+.vbtn{display:inline-flex;align-items:center;gap:4px;font-size:9px;padding:2px 8px;border-radius:10px;background:#fff0f0;color:var(--accent);cursor:pointer;border:none;font-family:inherit;font-weight:600}
+.vbtn:active{transform:scale(.94)}
+.tag-chips{display:flex;flex-wrap:wrap;gap:6px}
+.tag-chip{padding:5px 12px;border-radius:14px;border:1px solid var(--border);background:var(--card2,#fafafa);font-size:11px;color:var(--text2);cursor:pointer;transition:.15s}
+.tag-chip.on{background:#fff5f7;border-color:var(--accent);color:var(--accent);font-weight:600}
+.ava-up{width:72px;height:72px;border-radius:50%;overflow:hidden;background:var(--card2,#fafafa);display:flex;align-items:center;justify-content:center;font-size:30px;color:#ccc;cursor:pointer;border:2px dashed #ddd;position:relative;flex-shrink:0}
+.ava-up img{width:100%;height:100%;object-fit:cover}
+.rec-btn{width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.rec-btn.recording{background:#e84393;animation:pulse 1s infinite}
+.rec-time{font-size:11px;color:var(--text2);text-align:center;margin-top:6px;min-height:14px}
+.carrier-row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow)}
+.carrier-row .cava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.carrier-row .cava img{width:100%;height:100%;object-fit:cover}
+.carrier-row .cinf{flex:1;min-width:0}
+.carrier-row .cinf .t{font-size:13px;font-weight:600}
+.carrier-row .cinf .s{font-size:10px;color:var(--text2);margin-top:2px}
+.carrier-row .cacts{display:flex;gap:6px}
+.carrier-row .cacts button{font-size:10px;padding:5px 10px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap}
+.vst{font-size:9px;padding:1px 8px;border-radius:10px;background:#f0f0f3;color:var(--text2);margin-left:6px;font-weight:400}
+.vst.w{background:#fff5f7;color:var(--accent)}
+.vst.ok{background:rgba(0,184,148,.1);color:#00b894}
+.vst.no{background:rgba(253,121,168,.1);color:#e84393}
 </style>
 </head>
 <body>
@@ -301,6 +325,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
   <div class="logo"><span>文</span>哥电竞</div>
   <div class="role-switch">
     <button class="r-btn active" data-r="customer" onclick="swRole('customer')">客户</button>
+    <button class="r-btn" data-r="carrier" onclick="swRole('carrier')">打手</button>
     <button class="r-btn" data-r="admin" onclick="swRole('admin')">管理</button>
   </div>
 </div>
@@ -499,6 +524,55 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
     </div>
   </div>
 
+  <!-- ===== 打手端 ===== -->
+  <div class="page" id="dlogin">
+    <div class="empty" style="padding:60px 20px"><div class="ic" style="font-size:36px;opacity:1">🎮</div><p style="font-size:15px;font-weight:600;margin:8px 0 4px">打手登录</p><p style="font-size:11px;color:var(--text2);margin-bottom:16px">使用管理员分配的账号</p>
+      <div style="max-width:240px;margin:0 auto"><input id="dlName" placeholder="名字" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);font-size:15px;text-align:center;outline:none;font-family:inherit;margin-bottom:8px">
+      <input type="password" id="dlPw" placeholder="密码" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);font-size:15px;text-align:center;outline:none;font-family:inherit;margin-bottom:8px" onkeydown="if(event.key==='Enter')dl()">
+      <button class="ba" style="width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onclick="dl()">登录</button></div>
+    </div>
+  </div>
+  <div class="page" id="dnew">
+    <div class="section"><div class="section-title">📥 待接单 <span id="dnewN" style="margin-left:auto;font-size:10px;font-weight:400;color:var(--text2)"></span></div><div id="dnewList"></div></div>
+  </div>
+  <div class="page" id="dact">
+    <div class="section" style="padding-bottom:0">
+      <div class="filter-tabs" id="daf">
+        <div class="ftab active" data-f="active" onclick="daf('active')">进行中</div>
+        <div class="ftab" data-f="paused" onclick="daf('paused')">存单</div>
+      </div>
+    </div>
+    <div class="section" id="dactList"></div>
+  </div>
+  <div class="page" id="dhist">
+    <div class="section"><div class="section-title">📜 历史订单</div><div id="dhistList"></div></div>
+  </div>
+  <div class="page" id="dpro">
+    <div class="section">
+      <div class="section-title">👤 我的资料</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div class="ava-up" id="dAvaBox" onclick="document.getElementById('dAvaFile').click()"><img id="dAvaImg" style="display:none" alt=""><span id="dAvaTxt" style="position:absolute;font-size:9px;color:#bbb;bottom:2px">点击上传</span></div>
+        <input type="file" id="dAvaFile" accept="image/*" style="display:none" onchange="dAva(this)">
+        <div>
+          <div style="font-size:16px;font-weight:700" id="dProName">—</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px" id="dProStat">—</div>
+          <button style="margin-top:6px;font-size:10px;padding:4px 12px;border:1px solid var(--border);background:none;border-radius:10px;color:var(--text2);cursor:pointer;font-family:inherit" onclick="dLogout()">退出登录</button>
+        </div>
+      </div>
+      <div class="check-card" style="margin-bottom:10px">
+        <div class="f"><label>🏷️ 我的标签 <span style="font-size:9px;color:var(--text2)">（占位 1/2/3，之后换详细内容）</span></label><div class="tag-chips" id="dTags"></div></div>
+      </div>
+      <div class="check-card">
+        <div class="f"><label>🎤 语音条 <span class="vst" id="dVst">无</span></label>
+          <div style="font-size:10px;color:var(--text2);margin-bottom:8px">录制后提交管理端审核，审核通过后展示在打手卡片上（限 30 秒）</div>
+          <button class="rec-btn" id="dRecBtn" onclick="dRec()">🎤 开始录音</button>
+          <div class="rec-time" id="dRecTime"></div>
+          <div id="dRecPrev" style="display:none;margin-top:8px"><audio controls style="width:100%;height:34px" id="dRecAudio"></audio><div style="display:flex;gap:6px;margin-top:6px"><button style="flex:1;padding:8px;border:none;border-radius:10px;background:var(--card2,#fafafa);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="dRecCancel()">重录</button><button style="flex:1;padding:8px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="dRecSubmit()">提交审核</button></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== 管理员 ===== -->
   <div class="page" id="alogin">
     <div class="empty" style="padding:60px 20px"><div class="ic" style="font-size:36px;opacity:1">🔐</div><p style="font-size:15px;font-weight:600;margin:8px 0 4px">管理员登录</p><p style="font-size:11px;color:var(--text2);margin-bottom:16px">输入密码</p>
@@ -541,6 +615,19 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
       </div>
     </div>
   </div>
+  <div class="page" id="acarriers">
+    <div class="section"><div class="section-title">➕ 添加打手账号</div>
+      <div style="display:flex;gap:8px">
+        <input id="acName" placeholder="打手名字" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card2,#fafafa);font-size:13px;font-family:inherit;outline:none">
+        <input id="acPw" placeholder="初始密码" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card2,#fafafa);font-size:13px;font-family:inherit;outline:none">
+        <button class="ba" style="border:none;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="acAdd()">添加</button>
+      </div>
+    </div>
+    <div class="section"><div class="section-title">🎮 打手账号 <span id="acCount" style="margin-left:auto;font-size:10px;font-weight:400;color:var(--text2)"></span></div><div id="acList"></div></div>
+  </div>
+  <div class="page" id="avoice">
+    <div class="section"><div class="section-title">🎤 语音审核 <span id="avN" style="margin-left:auto;font-size:10px;font-weight:400;color:var(--text2)"></span></div><div id="avList"></div></div>
+  </div>
 </div>
 
 <!-- Tab -->
@@ -554,7 +641,15 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 <div class="tab-bar" id="atab" style="display:none">
   <div class="tab-item active" onclick="swAdmin('dashboard')"><span class="icon">📊</span>总览</div>
   <div class="tab-item" onclick="swAdmin('orders')"><span class="icon">📦</span>订单</div>
+  <div class="tab-item" onclick="swAdmin('carriers')"><span class="icon">🎮</span>打手</div>
+  <div class="tab-item" onclick="swAdmin('voice')"><span class="icon">🎤</span>语音</div>
   <div class="tab-item" onclick="swAdmin('stats')"><span class="icon">📈</span>统计</div>
+</div>
+<div class="tab-bar" id="btab" style="display:none">
+  <div class="tab-item active" onclick="swCarrier('new')"><span class="icon">📥</span>待接单</div>
+  <div class="tab-item" onclick="swCarrier('act')"><span class="icon">⏳</span>进行中</div>
+  <div class="tab-item" onclick="swCarrier('hist')"><span class="icon">📜</span>历史</div>
+  <div class="tab-item" onclick="swCarrier('pro')"><span class="icon">👤</span>我的</div>
 </div>
 
 <!-- Cart -->
@@ -609,10 +704,18 @@ const COUPONS={'WG88':{type:'discount',rate:0.88,note:'全场 88 折',maxUse:999
 const CR=[{n:'小陈',s:5,o:56,t:['🎤声控','💕氛围组','😊脾气好'],v:false},{n:'阿豪',s:5,o:42,t:['🔥技术','🎯战术大师','🏆胜率'],v:false},{n:'大鹏',s:5,o:38,t:['😂相声','🌙夜猫','⭐六边形'],v:false},{n:'阿杰',s:4,o:29,t:['🫶耐心','📚导师','🎙️声控'],v:false},{n:'老李',s:4,o:21,t:['🤝安全感','👑老江湖','✅稳'],v:false},{n:'小宇',s:5,o:18,t:['💃气氛','⚡秒回','🎮老炮'],v:false},];
 const SL=[{b:'bg1',b2:'🛡️护航单 ¥98起',s2:'双护稳定保底·累计788W',t2:'🔥热门',e:'🛡️'},{b:'bg2',b2:'✨新老板体验 ¥99',s2:'一人一次·巴克什·保底888W',t2:'🎁新人',e:'✨'},{b:'bg3',b2:'💪勇敢者行动 ¥488',s2:'带密钥清图·保底888W',t2:'💎高端',e:'🔫'},{b:'bg4',b2:'🎲赌单局撤离 ¥300起',s2:'一局定胜负·1000W起',t2:'🎯刺激',e:'🎲'}];
 
-let O=[],nid=1,ca=[],cf='all',af='all',tid=null,adm=false,cix=0,tmr=null,cur=0,curTab='home';
+let O=[],nid=1,ca=[],cf='all',af='all',tid=null,adm=false,cix=0,tmr=null,cur=0,curTab='home',role='customer';
 
 function ld(){try{const r=localStorage.getItem('wv6');if(r){const d=JSON.parse(r);O=d.orders||[];nid=d.nid||(O.length?Math.max(...O.map(o=>o.id))+1:1)}}catch(e){}}
 function sv(){localStorage.setItem('wv6',JSON.stringify({orders:O,nid}))}
+
+// ===== 打手账号（管理端建号，存 wv6carriers） =====
+let CR2=[];
+function ldCar(){try{const r=localStorage.getItem('wv6carriers');if(r){CR2=JSON.parse(r)}else{CR2=CR.map(x=>({n:x.n,pw:'123456',t:[],avatar:'',voice:'',vStatus:0}));svCar()}}catch(e){CR2=[]}}
+function svCar(){try{localStorage.setItem('wv6carriers',JSON.stringify(CR2))}catch(e){}}
+function carList(){const acc={};CR2.forEach(a=>acc[a.n]=a);const out=CR.map(x=>{const a=acc[x.n]||{};return{n:x.n,s:x.s,o:x.o,t:(a.t&&a.t.length)?a.t:x.t,v:x.v,avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0}});CR2.forEach(a=>{if(!CR.some(x=>x.n===a.n))out.push({n:a.n,s:5,o:0,t:a.t||[],v:true,avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0})});return out}
+let pvA=null;
+function pv(n){const a=CR2.find(x=>x.n===n);if(!a||!a.voice)return;if(pvA)pvA.pause();pvA=new Audio(a.voice);pvA.play().catch(()=>{})}
 
 function rCar(){const i=document.getElementById('ci'),d=document.getElementById('cd');i.innerHTML=SL.map(s=>`<div class="carousel-slide ${s.b}"><span class="tag">${s.t2}</span><div class="big">${s.b2}</div><div class="small">${s.s2}</div><div class="emoji-bg" style="position:absolute;font-size:70px;opacity:.1;right:-8px;bottom:-12px;transform:rotate(-10deg)">${s.e}</div></div>`).join('');d.innerHTML=SL.map((_,i)=>`<span class="${i===cix?'active':''}" onclick="gs(${i})"></span>`).join('');uCar();startC();}
 function gs(i){cix=i;uCar();startC()}
@@ -627,7 +730,7 @@ const tks=Object.keys(p);
 r.innerHTML=`<div class="food-grid">${tks.map(tk=>{const it=p[tk];return `<div class="food-card"><div class="fimg" style="font-size:20px;font-weight:700;color:#c9c9cf">${tL[tk]||tk}</div><div class="finfo"><div class="fnm">${c.n}<span class="fp">¥${it.p}</span></div><div class="fdesc">${tL[tk]||tk} · ${it.n}</div><div class="fbtns"><span class="fsales"></span><button class="addb" onclick="addC('${c.k}','${tk}')">+</button></div></div></div>`}).join('')}</div>`}
 
 function addC(ck,tk){const p=PT[ck]&&PT[ck][tk];if(!p){toast('暂不可用');return}const ex=ca.find(c=>c.category===ck&&c.tier===tk);if(ex){ex.qty=(ex.qty||1)+1}else{ca.push({category:ck,tier:tk,price:p.p,desc:p.n,qty:1})}uCart();toast(ck==='陪玩价格'?'已添加 1 小时':'已添加')}
-function uCart(){const b=document.getElementById('cartBar');if(adm||curTab!=='order'||!ca.length){b.style.display='none';return}b.style.display='flex';const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0),n=ca.reduce((s,c)=>s+(c.qty||1),0);document.getElementById('ccnt').textContent=n;document.getElementById('ctot').textContent='¥'+t}
+function uCart(){const b=document.getElementById('cartBar');if(role!=='customer'||curTab!=='order'||!ca.length){b.style.display='none';return}b.style.display='flex';const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0),n=ca.reduce((s,c)=>s+(c.qty||1),0);document.getElementById('ccnt').textContent=n;document.getElementById('ctot').textContent='¥'+t}
 function rp(){const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0);document.getElementById('cplist').innerHTML=ca.map((c,i)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">${c.category}·${tL[c.tier]||c.tier}</div><div style="font-size:10px;color:var(--text2)">${c.category==='陪玩价格'?((c.qty||1)+' 小时 · '):''}${c.desc}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="qtyctl"><button onclick="adj(${i},-1)">−</button><span>${c.qty||1}</span><button onclick="adj(${i},1)">+</button></div><div style="font-size:14px;font-weight:700;color:var(--accent);min-width:52px;text-align:right">¥${c.price*(c.qty||1)}</div><button style="width:22px;height:22px;border-radius:50%;border:none;background:var(--card2,#fafafa);color:var(--text2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center" onclick="rc(${i})">✕</button></div></div>`).join('');document.getElementById('cpt').textContent=t}
 function tc(){if(!ca.length){toast('购物车为空');return}const p=document.getElementById('cp2'),o=document.getElementById('co2');if(p.classList.contains('show')){p.classList.remove('show');o.classList.remove('show');return}rp();p.classList.add('show');o.classList.add('show')}
 function adj(i,d){const c=ca[i];if(!c)return;if(d<0&&(c.qty||1)<=1)return;c.qty=(c.qty||1)+d;uCart();rp()}
@@ -643,7 +746,7 @@ function renderCheck(){
   renderCheckTotals();
 }
 function renderCheckTotals(){const t=calcTotals();document.getElementById('coTotal').innerHTML=t.d>0?'¥'+t.pay+' <span style="text-decoration:line-through;color:#bbb;font-size:12px;font-weight:400">¥'+t.orig+'</span>':'¥'+t.orig}
-function renderCarryList(){const l=document.getElementById('coCarryList');if(!l)return;l.innerHTML=CR.map(x=>`<div class="carry-pick-item ${selCarry===x.n?'sel':''}" onclick="chooseCarry('${x.n}')"><div class="cpa">${x.n[0]}</div><div class="cpn"><div class="t">${x.n}<span class="stars"> ${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span></div><div class="s">${x.t.slice(0,2).join(' · ')}</div></div></div>`).join('')}
+function renderCarryList(){const l=document.getElementById('coCarryList');if(!l)return;l.innerHTML=carList().map(x=>`<div class="carry-pick-item ${selCarry===x.n?'sel':''}" onclick="chooseCarry('${x.n}')"><div class="cpa">${x.avatar?`<img src="${x.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="">`:x.n[0]}</div><div class="cpn"><div class="t">${x.n}<span class="stars"> ${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span></div><div class="s">${x.t.slice(0,2).join(' · ')}</div></div></div>`).join('')}
 function pickCarry(on){carryOn=on;document.getElementById('cpk-no').classList.toggle('active',!on);document.getElementById('cpk-yes').classList.toggle('active',!!on);document.getElementById('coCarryBox').style.display=on?'block':'none'}
 function chooseCarry(n){selCarry=n;renderCarryList()}
 function applyCoupon(){
@@ -713,12 +816,12 @@ function payDone(){
   ca=[];curCoupon=null;checkInfo={};uCart();tc();sv();rAll();toast('✅ 支付成功，下单完成！');swCust('myorders')
 }
 
-function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);const b=c.o>=40?'🔥人气':c.o>=20?'⭐认证':'🌱新晋';return `<div class="food-card"><div class="fimg" style="font-size:28px">${c.n[0]}<span style="position:absolute;top:6px;left:6px;font-size:8px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#fff">${b}</span></div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${c.t.map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">完成 ${c.o} 单</div></div></div>`};document.getElementById('ccount').textContent=CR.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${CR.map(h).join('')}</div>`}
+function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);const b=c.o>=40?'🔥人气':c.o>=20?'⭐认证':'🌱新晋';return `<div class="food-card"><div class="fimg" style="font-size:28px">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" alt="">`:c.n[0]}<span style="position:absolute;top:6px;left:6px;font-size:8px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#fff">${b}</span>${c.voice?`<span style="position:absolute;top:6px;right:6px"><button class="vbtn" onclick="pv('${c.n}')">🔊 试听</button></span>`:''}</div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${c.t.map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">完成 ${c.o} 单</div></div></div>`};const list=carList();document.getElementById('ccount').textContent=list.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${list.map(h).join('')}</div>`}
 
-function swCust(t){if(adm)return;curTab=t;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const pm={home:'ch',order:'corder',carries:'cc',myorders:'cmy',profile:'cp',faq:'cfaq',pay:'cpay',check:'ccheck'};const e=document.getElementById(pm[t]||('c'+t));if(e)e.classList.add('active');document.body.classList.toggle('pay-mode',t==='pay');document.getElementById('ctab').style.display=t==='pay'?'none':'flex';if(['home','order','carries','myorders','profile'].indexOf(t)>=0){document.querySelectorAll('#ctab .tab-item').forEach(x=>x.classList.remove('active'));const i=['home','order','carries','myorders','profile'].indexOf(t);const el=document.querySelector(`#ctab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active')}uCart();rAll()}
-function swRole(r){document.querySelectorAll('.r-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.r-btn[data-r="${r}"]`).classList.add('active');adm=r==='admin';document.getElementById('ctab').style.display=adm?'none':'flex';document.getElementById('atab').style.display=adm?'flex':'none';if(adm){document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));document.getElementById('alogin').classList.add('active')}else{curTab='home';document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));document.getElementById('ch').classList.add('active');document.querySelectorAll('#ctab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#ctab .tab-item:first-child').classList.add('active')}uCart();rAll()}
+function swCust(t){if(role!=='customer')return;curTab=t;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const pm={home:'ch',order:'corder',carries:'cc',myorders:'cmy',profile:'cp',faq:'cfaq',pay:'cpay',check:'ccheck'};const e=document.getElementById(pm[t]||('c'+t));if(e)e.classList.add('active');document.body.classList.toggle('pay-mode',t==='pay');document.getElementById('ctab').style.display=t==='pay'?'none':'flex';if(['home','order','carries','myorders','profile'].indexOf(t)>=0){document.querySelectorAll('#ctab .tab-item').forEach(x=>x.classList.remove('active'));const i=['home','order','carries','myorders','profile'].indexOf(t);const el=document.querySelector(`#ctab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active')}uCart();rAll()}
+function swRole(r){role=r;document.querySelectorAll('.r-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.r-btn[data-r="${r}"]`).classList.add('active');adm=r==='admin';document.getElementById('ctab').style.display=(r==='customer')?'flex':'none';document.getElementById('atab').style.display=(r==='admin')?'flex':'none';document.getElementById('btab').style.display=(r==='carrier')?'flex':'none';document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));if(r==='admin'){document.getElementById('alogin').classList.add('active')}else if(r==='carrier'){if(csess()){document.getElementById('dnew').classList.add('active');curCar='new'}else{document.getElementById('dlogin').classList.add('active')}}else{curTab='home';document.getElementById('ch').classList.add('active');document.querySelectorAll('#ctab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#ctab .tab-item:first-child').classList.add('active')}uCart();rAll()}
 function al(){if(document.getElementById('apw').value==='admin123'){document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));document.getElementById('adash').classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#atab .tab-item:first-child').classList.add('active');rAll();toast('✅登录成功')}else toast('❌密码错误')}
-function swAdmin(t){document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const e=document.getElementById('a'+({dashboard:'dash',orders:'orders',stats:'stats'}[t]||t));if(e)e.classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(tl=>tl.classList.remove('active'));const i=['dashboard','orders','stats'].indexOf(t);const el=document.querySelector(`#atab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active');rAll()}
+function swAdmin(t){if(role!=='admin')return;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const e=document.getElementById('a'+({dashboard:'dash',orders:'orders',carriers:'carriers',voice:'voice',stats:'stats'}[t]||t));if(e)e.classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(tl=>tl.classList.remove('active'));const i=['dashboard','orders','carriers','voice','stats'].indexOf(t);const el=document.querySelector(`#atab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active');rAll()}
 
 function fc(f){cf=f;document.querySelectorAll('#cof .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===f));rCust()}
 function fa(f){af=f;const v=['all','pending','active','paused','done','rejected'];document.querySelectorAll('#aot .atab').forEach((e,i)=>e.classList.toggle('active',v[i]===f));rAdmO()}
@@ -735,18 +838,18 @@ function itName(i){if(!i)return'订单';if(i.category==='陪玩价格')return '�
 function rHotCarries(){
   const el=document.getElementById('hCarries');
   if(!el)return;
-  const top=CR.slice().sort((a,b)=>b.o-a.o).slice(0,8);
-  el.innerHTML=`<div class="h-scroll">${top.map(c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="h-carry" onclick="swCust('carries')"><div class="ava">${c.n[0]}</div><div class="nm">${c.n}</div><div class="stars">${s}</div><div class="tag2">${c.t.slice(0,2).join(' · ')}</div></div>`}).join('')}</div>`
+  const top=carList().slice().sort((a,b)=>b.o-a.o).slice(0,8);
+  el.innerHTML=`<div class="h-scroll">${top.map(c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="h-carry" onclick="swCust('carries')"><div class="ava">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="">`:c.n[0]}</div><div class="nm">${c.n}</div><div class="stars">${s}</div><div class="tag2">${c.t.slice(0,2).join(' · ')}</div></div>`}).join('')}</div>`
 }
 let onlineN=18;
 function rOnline(){const el=document.getElementById('hOnline');if(el)el.textContent=onlineN}
 setInterval(()=>{onlineN=Math.max(8,Math.min(66,onlineN+Math.floor(Math.random()*9)-4));rOnline()},3000);
-function rAll(){rHome();rCust();rPro();rDash();rAdmO();rStats()}
+function rAll(){rHome();rCust();rPro();rDash();rAdmO();rStats();if(role==='carrier'&&csess())rCarAll();rAC();rAV()}
 
 function rCust(){const el=document.getElementById('col');let l=O.filter(o=>o.customer==='我').sort((a,b)=>b.id-a.id);if(cf!=='all')l=l.filter(o=>o.status===cf);if(!l.length){el.innerHTML='<div class="empty"><div class="ic">📭</div><p>暂无订单</p></div>';return}el.innerHTML=l.map(o=>{const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';return `<div class="order-card"><div class="top"><div class="svc">${its}</div><span class="st ${si.c}">${si.l}</span></div>${o.note?`<div class="desc">📝${o.note}</div>`:''}<div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${o.status==='done'?`<div class="actions"><button class="ba" onclick="reOrder(${o.id})">🔄 再来一单</button></div>`:''}</div>`}).join('')}
 function rPro(){const m=O.filter(o=>o.customer==='我');document.getElementById('pwSettled').textContent=m.filter(o=>o.status==='done').reduce((s,o)=>s+(o.total||0),0);document.getElementById('pwActiveP').textContent=m.filter(o=>o.status==='active').length;document.getElementById('pwTotalP').textContent=m.length;document.getElementById('pwDoneP').textContent=m.filter(o=>o.status==='done').length}
 
-function bCard(o){const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';let ac='';if(o.status==='pending')ac=`<div class="actions"><button class="ba" onclick="oA(${o.id})">✅接单</button><button class="bo" onclick="oR(${o.id})">🚫拒绝</button></div>`;else if(o.status==='active')ac=`<div class="actions"><button class="bg" onclick="oS(${o.id})">💰结账</button><button class="by" onclick="oP(${o.id})">⏸️存单</button></div>`;else if(o.status==='paused')ac=`<div class="actions"><button class="bg" onclick="oRs(${o.id})">▶️恢复</button><button class="bo" onclick="oS(${o.id})">💰结账</button></div>`;return `<div class="order-card"><div class="top"><div class="svc">#${o.id} ${its} <small>👤${o.customer||'?'}</small></div><span class="st ${si.c}">${si.l}</span></div><div class="desc">📞${o.wechat||o.contact||'无'}${o.phone?' · '+o.phone:''}${o.gameId?' · 🎮'+o.gameId:''}${o.carry?' · 🎯指定'+o.carry:''}${o.coupon?' · 🎟️'+o.coupon:''}${o.note?' · '+o.note:''}</div><div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${ac}</div>`}
+function bCard(o){const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';let ac='';if(o.status==='pending')ac=`<div class="actions"><button class="ba" onclick="oA(${o.id})">✅接单</button><button class="bo" onclick="oR(${o.id})">🚫拒绝</button></div>`;else if(o.status==='active')ac=`<div class="actions"><button class="bg" onclick="oS(${o.id})">💰结账</button><button class="by" onclick="oP(${o.id})">⏸️存单</button></div>`;else if(o.status==='paused')ac=`<div class="actions"><button class="bg" onclick="oRs(${o.id})">▶️恢复</button><button class="bo" onclick="oS(${o.id})">💰结账</button></div>`;return `<div class="order-card"><div class="top"><div class="svc">#${o.id} ${its} <small>👤${o.customer||'?'}${o.carrier?' · 🎮'+o.carrier:''}</small></div><span class="st ${si.c}">${si.l}</span></div><div class="desc">📞${o.wechat||o.contact||'无'}${o.phone?' · '+o.phone:''}${o.gameId?' · 🎮'+o.gameId:''}${o.carry?' · 🎯指定'+o.carry:''}${o.coupon?' · 🎟️'+o.coupon:''}${o.note?' · '+o.note:''}</div><div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${ac}</div>`}
 function rAdmO(){const el=document.getElementById('aol');let l=O.slice().sort((a,b)=>b.id-a.id);if(af!=='all')l=l.filter(o=>o.status===af);el.innerHTML=l.length?l.map(bCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无</p></div>'}
 function rDash(){const p=O.filter(o=>o.status==='pending').length,a=O.filter(o=>o.status==='active').length,ps=O.filter(o=>o.status==='paused').length,st=O.filter(o=>o.status==='done').reduce((s,o)=>s+(o.total||0),0);document.getElementById('ato').textContent=O.length;document.getElementById('aao').textContent=a;document.getElementById('asa').textContent='¥'+st.toFixed(0);document.getElementById('apo').textContent=ps;const el=document.getElementById('app');const l=O.filter(o=>o.status==='pending').sort((a,b)=>b.id-a.id).slice(0,3);el.innerHTML=l.length?l.map(bCard).join(''):'<div class="empty" style="padding:12px"><p>✅暂无待处理</p></div>'}
 function rStats(){document.getElementById('asP').textContent=O.filter(o=>o.status==='pending').length;document.getElementById('asA').textContent=O.filter(o=>o.status==='active').length;document.getElementById('asS').textContent=O.filter(o=>o.status==='paused').length;document.getElementById('asD').textContent=O.filter(o=>o.status==='done').length}
@@ -763,6 +866,63 @@ function oRs(id){tid=id;document.getElementById('mRs').classList.add('show')}
 function cRs(){const o=O.find(x=>x.id===tid);if(o){o.status='active';sv();rAll();toast('▶️已恢复')}cm('mRs')}
 function cPs(){const o=O.find(x=>x.id===tid);if(o){o.status='paused';sv();rAll();toast('⏸️已存单')}cm('mPs')}
 
+// ===== 打手端 =====
+function csess(){try{return localStorage.getItem('wv6csess')||''}catch(e){return''}}
+let curCar='new';
+function swCarrier(t){if(role!=='carrier')return;curCar=t;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const pm={new:'dnew',act:'dact',hist:'dhist',pro:'dpro'};const e=document.getElementById(pm[t]);if(e)e.classList.add('active');document.querySelectorAll('#btab .tab-item').forEach(x=>x.classList.remove('active'));const i=['new','act','hist','pro'].indexOf(t);const el=document.querySelector(`#btab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active');rCarAll()}
+function dl(){const n=document.getElementById('dlName').value.trim(),p=document.getElementById('dlPw').value;if(!n||!p){toast('请输入名字和密码');return}const a=CR2.find(x=>x.n===n);if(!a){toast('账号不存在');return}if(a.pw!==p){toast('密码错误');return}localStorage.setItem('wv6csess',n);swRole('carrier');toast('✅登录成功')}
+function dLogout(){localStorage.removeItem('wv6csess');swRole('carrier');toast('已退出登录')}
+function dMine(){const me=csess();return O.filter(o=>o.carrier===me)}
+function dCard(o){const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';let ac='';if(o.status==='pending')ac=`<div class="actions"><button class="ba" onclick="dAc(${o.id})">✅接单</button></div>`;else if(o.status==='active')ac=`<div class="actions"><button class="bg" onclick="dSt(${o.id})">💰结账</button><button class="by" onclick="dP(${o.id})">⏸️存单</button></div>`;else if(o.status==='paused')ac=`<div class="actions"><button class="bg" onclick="dRs(${o.id})">▶️恢复</button><button class="bo" onclick="dSt(${o.id})">💰结账</button></div>`;return `<div class="order-card"><div class="top"><div class="svc">#${o.id} ${its}</div><span class="st ${si.c}">${si.l}</span></div><div class="desc">📞${o.wechat||'无'}${o.phone?' · '+o.phone:''}${o.gameId?' · 🎮'+o.gameId:''}${o.carry?' · 🎯指定'+o.carry:''}${o.note?' · '+o.note:''}</div><div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${ac}</div>`}
+function dAc(id){const o=O.find(x=>x.id===id);if(!o||o.status!=='pending')return;if(o.carry&&o.carry!==csess()){toast('此单已指定其他打手');return}o.status='active';o.carrier=csess();o.acceptAt=new Date().toLocaleString('zh-CN');sv();rAll();toast('✅已接单')}
+function dSt(id){const o=O.find(x=>x.id===id);if(!o||o.carrier!==csess())return;o.status='done';sv();rAll();toast('💰已结账')}
+function dP(id){const o=O.find(x=>x.id===id);if(!o||o.carrier!==csess())return;o.status='paused';sv();rAll();toast('⏸️已存单')}
+function dRs(id){const o=O.find(x=>x.id===id);if(!o||o.carrier!==csess())return;o.status='active';sv();rAll();toast('▶️已恢复')}
+function daf(f){document.querySelectorAll('#daf .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===f));rDAct()}
+function rDNew(){const el=document.getElementById('dnewList');if(!el)return;const me=csess();let l=O.filter(o=>o.status==='pending'&&(!o.carry||o.carry===me)).sort((a,b)=>b.id-a.id);document.getElementById('dnewN').textContent=l.length+' 单';el.innerHTML=l.length?l.map(dCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无待接单</p></div>'}
+function rDAct(){const el=document.getElementById('dactList');if(!el)return;const f=document.querySelector('#daf .ftab.active').dataset.f;let l=dMine().filter(o=>o.status===f).sort((a,b)=>b.id-a.id);el.innerHTML=l.length?l.map(dCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无</p></div>'}
+function rDHist(){const el=document.getElementById('dhistList');if(!el)return;let l=dMine().filter(o=>o.status==='done'||o.status==='rejected').sort((a,b)=>b.id-a.id);el.innerHTML=l.length?l.map(dCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无历史订单</p></div>'}
+function rDPro(){const el=document.getElementById('dProName');if(!el)return;const me=csess(),a=CR2.find(x=>x.n===me);if(!a)return;el.textContent=me;const done=dMine().filter(o=>o.status==='done').length;document.getElementById('dProStat').textContent='已完成 '+done+' 单';const img=document.getElementById('dAvaImg'),txt=document.getElementById('dAvaTxt');if(a.avatar){img.src=a.avatar;img.style.display='block';txt.style.display='none'}else{img.style.display='none';txt.style.display='block'}const vst=document.getElementById('dVst');const vTxt={0:'无',1:'审核中',2:'已通过',3:'已拒绝'};vst.textContent=vTxt[a.vStatus]||'无';vst.className='vst'+(a.vStatus===1?' w':a.vStatus===2?' ok':a.vStatus===3?' no':'');rDTags()}
+const CARRY_TAGS=['1','2','3'];
+function rDTags(){const el=document.getElementById('dTags');if(!el)return;const a=CR2.find(x=>x.n===csess());if(!a)return;el.innerHTML=CARRY_TAGS.map(t=>`<div class="tag-chip ${(a.t||[]).indexOf(t)>=0?'on':''}" onclick="dTagT('${t}')">${t}</div>`).join('')}
+function dTagT(t){const a=CR2.find(x=>x.n===csess());if(!a)return;a.t=a.t||[];const i=a.t.indexOf(t);if(i>=0)a.t.splice(i,1);else a.t.push(t);svCar();rDPro();rAll();toast('标签已更新')}
+function dAva(inp){const f=inp.files&&inp.files[0];if(!f)return;if(f.size>300*1024){toast('图片太大，请压缩到 300KB 内');return}const rd=new FileReader();rd.onload=()=>{const a=CR2.find(x=>x.n===csess());if(!a)return;a.avatar=rd.result;svCar();rDPro();rAll();toast('✅头像已更新')};rd.readAsDataURL(f)}
+// 语音条录制（≤30秒）
+let dRecM=null,dRecChunks=[],dRecT=null,dRecSec=0,dRecUrl='';
+function dRec(){
+  const btn=document.getElementById('dRecBtn');
+  if(dRecM){dRecStop();return}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('当前环境不支持录音');return}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(st=>{
+    dRecChunks=[];dRecSec=0;
+    dRecM=new MediaRecorder(st);
+    dRecM.ondataavailable=e=>{if(e.data&&e.data.size)dRecChunks.push(e.data)};
+    dRecM.onstop=()=>{
+      st.getTracks().forEach(t=>t.stop());
+      const blob=new Blob(dRecChunks,{type:dRecM.mimeType||'audio/webm'});
+      const rd=new FileReader();
+      rd.onload=()=>{dRecUrl=rd.result;const au=document.getElementById('dRecAudio');au.src=dRecUrl;document.getElementById('dRecPrev').style.display='block';document.getElementById('dRecTime').textContent='已录 '+dRecSec+' 秒'};
+      rd.readAsDataURL(blob);
+      dRecM=null;btn.textContent='🎤 开始录音';btn.classList.remove('recording');
+    };
+    dRecM.start();btn.textContent='⏹ 停止录音';btn.classList.add('recording');
+    dRecT=setInterval(()=>{dRecSec++;document.getElementById('dRecTime').textContent='录音中 '+dRecSec+' / 30 秒';if(dRecSec>=30)dRecStop()},1000);
+  }).catch(()=>toast('无法访问麦克风'));
+}
+function dRecStop(){if(!dRecM)return;try{dRecM.stop()}catch(e){}clearInterval(dRecT)}
+function dRecCancel(){dRecUrl='';document.getElementById('dRecPrev').style.display='none';document.getElementById('dRecTime').textContent='';const au=document.getElementById('dRecAudio');au.pause();au.removeAttribute('src')}
+function dRecSubmit(){if(!dRecUrl){toast('先录音再提交');return}const a=CR2.find(x=>x.n===csess());if(!a)return;a.voice=dRecUrl;a.vStatus=1;svCar();dRecCancel();rDPro();rAC();rAV();toast('✅已提交审核')}
+function rCarAll(){rDNew();rDAct();rDHist();rDPro()}
+
+// ===== 管理端：打手账号 + 语音审核 =====
+function rAC(){const el=document.getElementById('acList');if(!el)return;document.getElementById('acCount').textContent=CR2.length+' 位';el.innerHTML=CR2.length?CR2.map(a=>{const vs={0:'无',1:'待审核',2:'已通过',3:'已拒绝'}[a.vStatus]||'无';const done=O.filter(o=>o.carrier===a.n&&o.status==='done').length;return `<div class="carrier-row"><div class="cava">${a.avatar?`<img src="${a.avatar}" alt="">`:a.n[0]}</div><div class="cinf"><div class="t">${a.n}<span class="vst${a.vStatus===1?' w':a.vStatus===2?' ok':a.vStatus===3?' no':''}">${vs}</span></div><div class="s">完成 ${done} 单 · 密码 ${'●'.repeat((a.pw||'').length)}</div></div><div class="cacts"><button class="bo" onclick="acPw('${a.n}')">重置密码</button><button class="br" onclick="acDel('${a.n}')">删除</button></div></div>`}).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无打手账号</p></div>'}
+function acAdd(){const n=document.getElementById('acName').value.trim(),p=document.getElementById('acPw').value.trim();if(!n||!p){toast('请填写名字和密码');return}if(CR2.some(x=>x.n===n)){toast('该打手已存在');return}CR2.push({n:n,pw:p,t:[],avatar:'',voice:'',vStatus:0});svCar();document.getElementById('acName').value='';document.getElementById('acPw').value='';rAC();rAll();toast('✅已添加打手 '+n)}
+function acPw(n){const p=prompt('输入 '+n+' 的新密码');if(!p)return;const a=CR2.find(x=>x.n===n);if(!a)return;a.pw=p;svCar();rAC();toast('✅密码已重置')}
+function acDel(n){if(!confirm('确定删除打手 '+n+' 的账号？'))return;CR2=CR2.filter(x=>x.n!==n);svCar();rAC();rAll();toast('已删除 '+n)}
+function rAV(){const el=document.getElementById('avList');if(!el)return;const l=CR2.filter(a=>a.vStatus===1);document.getElementById('avN').textContent=l.length+' 条待审核';el.innerHTML=l.length?l.map(a=>`<div class="carrier-row" style="flex-wrap:wrap"><div class="cava">${a.avatar?`<img src="${a.avatar}" alt="">`:a.n[0]}</div><div class="cinf"><div class="t">${a.n}</div><div class="s">语音条 · 待审核</div><audio controls src="${a.voice}" style="width:100%;height:32px;margin-top:6px"></audio></div><div class="cacts"><button class="bg" onclick="avOk('${a.n}')">✅通过</button><button class="br" onclick="avNo('${a.n}')">❌拒绝</button></div></div>`).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无待审核语音</p></div>'}
+function avOk(n){const a=CR2.find(x=>x.n===n);if(!a)return;a.vStatus=2;svCar();rAV();rAC();rAll();toast('✅已通过，语音已上线')}
+function avNo(n){const a=CR2.find(x=>x.n===n);if(!a)return;a.vStatus=3;svCar();rAV();rAC();rAll();toast('已拒绝')}
+
 function cm(id){document.getElementById(id).classList.remove('show')}
 function ldInfo(){try{const r=JSON.parse(localStorage.getItem('wv6info')||'{}');const g=document.getElementById('coGameId'),w=document.getElementById('coWechat');if(g&&r.gameId)g.value=r.gameId;if(w&&r.wechat)w.value=r.wechat}catch(e){}}
 function svInfo(){try{localStorage.setItem('wv6info',JSON.stringify({gameId:document.getElementById('coGameId').value.trim(),wechat:document.getElementById('coWechat').value.trim()}))}catch(e){}}
@@ -773,7 +933,7 @@ function tf(el){el.classList.toggle('open')}
 let toastT=null;
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');if(toastT)clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200)}
 
-ld();rCar();rMenu();rCarries();rHotCarries();rOnline();rAll();
+ld();ldCar();rCar();rMenu();rCarries();rHotCarries();rOnline();rAll();
 </script>
 </body>
 </html>
