@@ -304,6 +304,19 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 .vbar .vprog{width:34px;height:3px;background:rgba(255,255,255,.35);border-radius:2px;overflow:hidden;flex-shrink:0}
 .vbar .vfill{display:block;height:100%;background:#fff;width:0%;transition:width .3s linear}
 .vbar .vtime{font-size:8px;white-space:nowrap}
+
+/* ===== 打手主页 + 档次艺术字 ===== */
+.tier-tag{display:inline-block;font-size:9px;font-weight:800;color:#fff;padding:2px 8px;border-radius:8px;letter-spacing:1px;background:linear-gradient(135deg,var(--tc1,#e94560),var(--tc2,#ff6b6b));box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.pro-hero{background:linear-gradient(135deg,#e94560,#ff6b6b);color:#fff;padding:14px 16px 26px;position:relative;overflow:hidden}
+.pro-hero::after{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+.pro-back{position:absolute;top:14px;left:16px;font-size:18px;cursor:pointer;z-index:2;background:rgba(255,255,255,.18);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px}
+.pro-tier{text-align:center;font-size:13px;font-weight:800;letter-spacing:4px;color:rgba(255,255,255,.92);margin-bottom:10px;text-shadow:0 1px 8px rgba(0,0,0,.18)}
+.pro-ava{width:84px;height:84px;border-radius:50%;margin:0 auto 8px;border:3px solid rgba(255,255,255,.65);overflow:hidden;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.pro-ava img{width:100%;height:100%;object-fit:cover}
+.pro-name{text-align:center;font-size:20px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.15)}
+.pro-stars{text-align:center;font-size:12px;color:var(--gold);letter-spacing:2px;margin-top:4px}
+.pro-voice{display:flex;align-items:center;gap:8px;background:var(--card2,#fafafa);border-radius:10px;padding:10px 12px}
+.pro-voice .vbar{position:static;background:var(--accent);color:#fff;padding:6px 12px;border-radius:16px;font-size:11px}
 .tag-chips{display:flex;flex-wrap:wrap;gap:6px}
 .tag-chip{padding:5px 12px;border-radius:14px;border:1px solid var(--border);background:var(--card2,#fafafa);font-size:11px;color:var(--text2);cursor:pointer;transition:.15s}
 .tag-chip.on{background:#fff5f7;border-color:var(--accent);color:var(--accent);font-weight:600}
@@ -385,8 +398,35 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 
   <!-- 打手 -->
   <div class="page" id="cc">
-    <div class="section" style="padding-bottom:0"><div class="section-title">🎮 打手 <span class="more" id="ccount"></span></div></div>
+    <div class="section" style="padding-bottom:0"><div class="section-title">🎮 打手 <span class="more" id="ccount"></span></div>
+      <div class="filter-tabs" id="coTier">
+        <div class="ftab active" onclick="fTier('all')">全部</div>
+        <div class="ftab" onclick="fTier('文神')">🏆文神</div>
+        <div class="ftab" onclick="fTier('文叔')">🛡️文叔</div>
+        <div class="ftab" onclick="fTier('文哥')">⚡文哥</div>
+        <div class="ftab" onclick="fTier('文宝宝')">🍬文宝宝</div>
+      </div>
+    </div>
     <div id="cclist"></div>
+  </div>
+
+  <!-- 打手主页 -->
+  <div class="page" id="cpro">
+    <div class="pro-hero" id="proHero">
+      <div class="pro-back" onclick="swCust('carries')">←</div>
+      <div class="pro-tier" id="proTier"></div>
+      <div class="pro-ava" id="proAva"></div>
+      <div class="pro-name" id="proName"></div>
+      <div class="pro-stars" id="proStars"></div>
+    </div>
+    <div class="section">
+      <div class="check-card" style="margin-bottom:10px">
+        <div class="f" style="margin-bottom:8px"><label>🏷️ 标签</label><div id="proTags"></div></div>
+        <div class="f" style="margin-bottom:8px"><label>📊 完成单数</label><div id="proOrders"></div></div>
+        <div class="f" style="margin-bottom:0"><label>🎤 语音条</label><div id="proVoice"></div></div>
+      </div>
+      <button class="pay-btn" style="width:100%" onclick="orderFromPro()">🎯 找他下单</button>
+    </div>
   </div>
 
   <!-- 我的订单 -->
@@ -707,7 +747,13 @@ const CAT=[{k:'护航单',n:'护航单',d:'保底护航'},{k:'潮汐监狱',n:'�
 const tL={体验:'基础',标准:'标准',高级:'高级',豪华:'豪华'};
 // ⚠️ 优惠券配置（老大自己维护：满减=threshold+amount，折扣=rate，maxUse=总可用次数）
 const COUPONS={'WG88':{type:'discount',rate:0.88,note:'全场 88 折',maxUse:999},'MAN300':{type:'reduce',threshold:300,amount:50,note:'满 300 减 50',maxUse:999}};
-const CR=[{n:'小陈',s:5,o:56,t:['🎤声控','💕氛围组','😊脾气好'],v:false},{n:'阿豪',s:5,o:42,t:['🔥技术','🎯战术大师','🏆胜率'],v:false},{n:'大鹏',s:5,o:38,t:['😂相声','🌙夜猫','⭐六边形'],v:false},{n:'阿杰',s:4,o:29,t:['🫶耐心','📚导师','🎙️声控'],v:false},{n:'老李',s:4,o:21,t:['🤝安全感','👑老江湖','✅稳'],v:false},{n:'小宇',s:5,o:18,t:['💃气氛','⚡秒回','🎮老炮'],v:false},];
+const CR=[
+{n:'QWQ',tier:'文神',s:5,o:0,t:[]},{n:'小程',tier:'文神',s:5,o:0,t:[]},{n:'小燚',tier:'文神',s:5,o:0,t:[]},
+{n:'小或',tier:'文叔',s:5,o:0,t:[]},{n:'小北',tier:'文叔',s:5,o:0,t:[]},{n:'潇洒哥',tier:'文叔',s:5,o:0,t:[]},{n:'小浩',tier:'文叔',s:5,o:0,t:[]},{n:'小与',tier:'文叔',s:5,o:0,t:[]},{n:'堂堂',tier:'文叔',s:5,o:0,t:[]},{n:'扎扎',tier:'文叔',s:5,o:0,t:[]},
+{n:'Ay',tier:'文哥',s:5,o:0,t:[]},{n:'老九',tier:'文哥',s:5,o:0,t:[]},{n:'地主',tier:'文哥',s:5,o:0,t:[]},{n:'小卿',tier:'文哥',s:5,o:0,t:[]},{n:'农民',tier:'文哥',s:5,o:0,t:[]},{n:'Lin',tier:'文哥',s:5,o:0,t:[]},{n:'小羊',tier:'文哥',s:5,o:0,t:[]},{n:'小轩',tier:'文哥',s:5,o:0,t:[]},{n:'呆呆王',tier:'文哥',s:5,o:0,t:[]},{n:'小梦',tier:'文哥',s:5,o:0,t:[]},{n:'搞完',tier:'文哥',s:5,o:0,t:[]},{n:'小洛',tier:'文哥',s:5,o:0,t:[]},{n:'基里连科',tier:'文哥',s:5,o:0,t:[]},{n:'小罗',tier:'文哥',s:5,o:0,t:[]},{n:'回忆泪',tier:'文哥',s:5,o:0,t:[]},{n:'柠檬',tier:'文哥',s:5,o:0,t:[]},{n:'调皮佬',tier:'文哥',s:5,o:0,t:[]},{n:'南瓜',tier:'文哥',s:5,o:0,t:[]},{n:'Young181',tier:'文哥',s:5,o:0,t:[]},
+{n:'小沫',tier:'文宝宝',s:5,o:0,t:[]},{n:'EVE',tier:'文宝宝',s:5,o:0,t:[]},{n:'小饱',tier:'文宝宝',s:5,o:0,t:[]},
+];
+const TIER_META={'文神':{c1:'#8e44ad',c2:'#f1c40f',ic:'🏆',art:'文神'},'文叔':{c1:'#2980b9',c2:'#3498db',ic:'🛡️',art:'文叔'},'文哥':{c1:'#e94560',c2:'#ff6b6b',ic:'⚡',art:'文哥'},'文宝宝':{c1:'#fd79a8',c2:'#e84393',ic:'🍬',art:'文宝宝'}};
 const SL=[{b:'bg1',b2:'🛡️护航单 ¥98起',s2:'双护稳定保底·累计788W',t2:'🔥热门',e:'🛡️'},{b:'bg2',b2:'✨新老板体验 ¥99',s2:'一人一次·巴克什·保底888W',t2:'🎁新人',e:'✨'},{b:'bg3',b2:'💪勇敢者行动 ¥488',s2:'带密钥清图·保底888W',t2:'💎高端',e:'🔫'},{b:'bg4',b2:'🎲赌单局撤离 ¥300起',s2:'一局定胜负·1000W起',t2:'🎯刺激',e:'🎲'}];
 
 let O=[],nid=1,ca=[],cf='all',af='all',tid=null,adm=false,cix=0,tmr=null,cur=0,curTab='home',role='customer';
@@ -717,9 +763,9 @@ function sv(){localStorage.setItem('wv6',JSON.stringify({orders:O,nid}))}
 
 // ===== 打手账号（管理端建号，存 wv6carriers） =====
 let CR2=[];
-function ldCar(){try{const r=localStorage.getItem('wv6carriers');if(r){CR2=JSON.parse(r)}else{CR2=CR.map(x=>({n:x.n,pw:'123456',t:[],avatar:'',voice:'',vStatus:0}));svCar()}}catch(e){CR2=[]}}
+function ldCar(){try{const ver=localStorage.getItem('wv6carver');if(ver!=='2'){const r=localStorage.getItem('wv6carriers');let old=r?JSON.parse(r):[];CR2=CR.map(x=>{const a=old.find(o=>o.n===x.n);return a?{n:x.n,pw:a.pw||'123456',t:a.t||[],avatar:a.avatar||'',voice:a.voice||'',vStatus:a.vStatus||0,tier:x.tier}:{n:x.n,pw:'123456',t:[],avatar:'',voice:'',vStatus:0,tier:x.tier}});old.forEach(a=>{if(!CR.some(x=>x.n===a.n))CR2.push(a)});localStorage.setItem('wv6carver','2');svCar()}else{const r=localStorage.getItem('wv6carriers');CR2=r?JSON.parse(r):[]}}catch(e){CR2=[]}}
 function svCar(){try{localStorage.setItem('wv6carriers',JSON.stringify(CR2));return true}catch(e){return false}}
-function carList(){const acc={};CR2.forEach(a=>acc[a.n]=a);const out=CR.map(x=>{const a=acc[x.n]||{};return{n:x.n,s:x.s,o:x.o,t:(a.t&&a.t.length)?a.t:x.t,v:x.v,avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0}});CR2.forEach(a=>{if(!CR.some(x=>x.n===a.n))out.push({n:a.n,s:5,o:0,t:a.t||[],v:true,avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0})});return out}
+function carList(){const acc={};CR2.forEach(a=>acc[a.n]=a);const out=CR.map(x=>{const a=acc[x.n]||{};return{n:x.n,s:x.s,o:x.o,t:(a.t&&a.t.length)?a.t:x.t,v:x.v,tier:x.tier,avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0}});CR2.forEach(a=>{if(!CR.some(x=>x.n===a.n))out.push({n:a.n,s:a.s||5,o:0,t:a.t||[],v:true,tier:a.tier||'文哥',avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0})});return out}
 let pvA=null,pvName='',pvTot={};
 function pv(n){
   const a=CR2.find(x=>x.n===n);if(!a||!a.voice)return;
@@ -768,7 +814,7 @@ function renderCheck(){
   renderCheckTotals();
 }
 function renderCheckTotals(){const t=calcTotals();document.getElementById('coTotal').innerHTML=t.d>0?'¥'+t.pay+' <span style="text-decoration:line-through;color:#bbb;font-size:12px;font-weight:400">¥'+t.orig+'</span>':'¥'+t.orig}
-function renderCarryList(){const l=document.getElementById('coCarryList');if(!l)return;l.innerHTML=carList().map(x=>`<div class="carry-pick-item ${selCarry===x.n?'sel':''}" onclick="chooseCarry('${x.n}')"><div class="cpa">${x.avatar?`<img src="${x.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="">`:x.n[0]}</div><div class="cpn"><div class="t">${x.n}<span class="stars"> ${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span></div><div class="s">${x.t.slice(0,2).join(' · ')}</div></div></div>`).join('')}
+function renderCarryList(){const l=document.getElementById('coCarryList');if(!l)return;l.innerHTML=carList().map(x=>`<div class="carry-pick-item ${selCarry===x.n?'sel':''}" onclick="chooseCarry('${x.n}')"><div class="cpa">${x.avatar?`<img src="${x.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="">`:x.n[0]}</div><div class="cpn"><div class="t">${x.n}<span class="stars"> ${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span></div><div class="s">${tierTag(x)} ${(x.t||[]).slice(0,1).join('')}</div></div></div>`).join('')}
 function pickCarry(on){carryOn=on;document.getElementById('cpk-no').classList.toggle('active',!on);document.getElementById('cpk-yes').classList.toggle('active',!!on);document.getElementById('coCarryBox').style.display=on?'block':'none'}
 function chooseCarry(n){selCarry=n;renderCarryList()}
 function applyCoupon(){
@@ -838,9 +884,16 @@ function payDone(){
   ca=[];curCoupon=null;checkInfo={};uCart();tc();sv();rAll();toast('✅ 支付成功，下单完成！');swCust('myorders')
 }
 
-function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);const b=c.o>=40?'🔥人气':c.o>=20?'⭐认证':'🌱新晋';return `<div class="food-card"><div class="fimg" style="font-size:28px">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" alt="">`:c.n[0]}<span style="position:absolute;top:6px;left:6px;font-size:8px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#fff">${b}</span>${c.voice?`<button class="vbar" onclick="pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button>`:''}</div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${c.t.map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">完成 ${c.o} 单</div></div></div>`};const list=carList();document.getElementById('ccount').textContent=list.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${list.map(h).join('')}</div>`}
+let tierF='all';
+function fTier(t){tierF=t;document.querySelectorAll('#coTier .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===t||(t==='all'&&!e.dataset.f)));rCarries()}
+function tierTag(c){const m=TIER_META[c.tier]||TIER_META['文哥'];return `<span class="tier-tag" style="--tc1:${m.c1};--tc2:${m.c2}">${m.ic} ${m.art}</span>`}
+function shuffled(l){const a=l.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
+function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="food-card" onclick="openPro('${c.n}')"><div class="fimg" style="font-size:28px">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" alt="">`:c.n[0]}<span style="position:absolute;top:6px;left:6px">${tierTag(c)}</span>${c.voice?`<button class="vbar" onclick="event.stopPropagation();pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button>`:''}</div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${(c.t||[]).slice(0,2).map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')||'<span style="font-size:9px;color:#ccc">暂无标签</span>'}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">${c.tier} · 完成 ${c.o} 单</div></div></div>`};let list=carList();if(tierF!=='all')list=list.filter(c=>c.tier===tierF);list=shuffled(list);document.getElementById('ccount').textContent=list.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${list.map(h).join('')}</div>`}
+function openPro(n){const c=carList().find(x=>x.n===n);if(!c)return;const m=TIER_META[c.tier]||TIER_META['文哥'];document.getElementById('proHero').style.background=`linear-gradient(135deg,${m.c1},${m.c2})`;document.getElementById('proTier').innerHTML=tierTag(c);document.getElementById('proAva').innerHTML=c.avatar?`<img src="${c.avatar}" alt="">`:c.n[0];document.getElementById('proName').textContent=c.n;document.getElementById('proStars').textContent='★'.repeat(c.s)+'☆'.repeat(5-c.s);document.getElementById('proTags').innerHTML=(c.t||[]).length?c.t.map(t=>`<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:var(--card2,#fafafa);color:var(--text2);margin-right:4px">${t}</span>`).join(''):'<span style="font-size:10px;color:#ccc">暂无标签</span>';document.getElementById('proOrders').textContent=c.o+' 单';const pv=document.getElementById('proVoice');if(c.voice){pv.innerHTML=`<div class="pro-voice"><button class="vbar" onclick="pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button><span style="font-size:10px;color:var(--text2)">点我听他说话</span></div>`}else{pv.innerHTML='<span style="font-size:10px;color:#ccc">该打手还没上传语音</span>'}curPro=n;swCust('pro')}
+let curPro='';
+function orderFromPro(){if(!curPro)return;pickCarry(1);chooseCarry(curPro);swCust('order');toast('已指定打手 '+curPro+'，加购后提交')}
 
-function swCust(t){if(role!=='customer')return;curTab=t;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const pm={home:'ch',order:'corder',carries:'cc',myorders:'cmy',profile:'cp',faq:'cfaq',pay:'cpay',check:'ccheck'};const e=document.getElementById(pm[t]||('c'+t));if(e)e.classList.add('active');document.body.classList.toggle('pay-mode',t==='pay');document.getElementById('ctab').style.display=t==='pay'?'none':'flex';if(['home','order','carries','myorders','profile'].indexOf(t)>=0){document.querySelectorAll('#ctab .tab-item').forEach(x=>x.classList.remove('active'));const i=['home','order','carries','myorders','profile'].indexOf(t);const el=document.querySelector(`#ctab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active')}uCart();rAll()}
+function swCust(t){if(role!=='customer')return;curTab=t;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const pm={home:'ch',order:'corder',carries:'cc',myorders:'cmy',profile:'cp',faq:'cfaq',pay:'cpay',check:'ccheck',pro:'cpro'};const e=document.getElementById(pm[t]||('c'+t));if(e)e.classList.add('active');document.body.classList.toggle('pay-mode',t==='pay');document.getElementById('ctab').style.display=t==='pay'?'none':'flex';if(['home','order','carries','myorders','profile'].indexOf(t)>=0){document.querySelectorAll('#ctab .tab-item').forEach(x=>x.classList.remove('active'));const i=['home','order','carries','myorders','profile'].indexOf(t);const el=document.querySelector(`#ctab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active')}uCart();rAll()}
 function swRole(r){role=r;document.querySelectorAll('.r-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.r-btn[data-r="${r}"]`).classList.add('active');adm=r==='admin';document.getElementById('ctab').style.display=(r==='customer')?'flex':'none';document.getElementById('atab').style.display=(r==='admin')?'flex':'none';document.getElementById('btab').style.display=(r==='carrier')?'flex':'none';document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));if(r==='admin'){document.getElementById('alogin').classList.add('active')}else if(r==='carrier'){if(csess()){document.getElementById('dnew').classList.add('active');curCar='new'}else{document.getElementById('dlogin').classList.add('active')}}else{curTab='home';document.getElementById('ch').classList.add('active');document.querySelectorAll('#ctab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#ctab .tab-item:first-child').classList.add('active')}uCart();rAll()}
 function al(){if(document.getElementById('apw').value==='admin123'){document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));document.getElementById('adash').classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#atab .tab-item:first-child').classList.add('active');rAll();toast('✅登录成功')}else toast('❌密码错误')}
 function swAdmin(t){if(role!=='admin')return;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const e=document.getElementById('a'+({dashboard:'dash',orders:'orders',carriers:'carriers',voice:'voice',stats:'stats'}[t]||t));if(e)e.classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(tl=>tl.classList.remove('active'));const i=['dashboard','orders','carriers','voice','stats'].indexOf(t);const el=document.querySelector(`#atab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active');rAll()}
@@ -860,8 +913,8 @@ function itName(i){if(!i)return'订单';if(i.category==='陪玩价格')return '�
 function rHotCarries(){
   const el=document.getElementById('hCarries');
   if(!el)return;
-  const top=carList().slice().sort((a,b)=>b.o-a.o).slice(0,8);
-  el.innerHTML=`<div class="h-scroll">${top.map(c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="h-carry" onclick="swCust('carries')"><div class="ava">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="">`:c.n[0]}</div><div class="nm">${c.n}</div><div class="stars">${s}</div><div class="tag2">${c.t.slice(0,2).join(' · ')}</div></div>`}).join('')}</div>`
+  const top=shuffled(carList()).slice(0,8);
+  el.innerHTML=`<div class="h-scroll">${top.map(c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="h-carry" onclick="openPro('${c.n}')"><div class="ava">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="">`:c.n[0]}</div><div class="nm">${c.n}</div><div class="stars">${s}</div><div class="tag2">${c.tier}</div></div>`}).join('')}</div>`
 }
 let onlineN=18;
 function rOnline(){const el=document.getElementById('hOnline');if(el)el.textContent=onlineN}
