@@ -273,6 +273,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .pick-btn{flex:1;text-align:center;padding:9px 0;border-radius:10px;border:1px solid var(--border);background:var(--card2,#fafafa);font-size:12px;color:var(--text2);cursor:pointer;transition:.15s;font-weight:500}
 .pick-btn.active{background:#fff5f7;border-color:var(--accent);color:var(--accent);font-weight:600}
 .carry-pick{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.carry-pick::-webkit-scrollbar{width:0}
 .carry-pick-item{display:flex;align-items:center;gap:8px;background:var(--card2,#fafafa);border:1px solid var(--border);border-radius:10px;padding:7px 8px;cursor:pointer;transition:.15s}
 .carry-pick-item.sel{border-color:var(--accent);background:#fff5f7}
 .carry-pick-item .cpa{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -544,8 +545,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
           </div>
         </div>
         <div class="f" id="coCarryBox" style="display:none">
-          <label>👤 选择打手</label>
-          <div class="carry-pick" id="coCarryList"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><label style="margin:0">👤 选择打手</label><span style="font-size:11px;font-weight:600;color:var(--accent)" id="cpkCount">已选 0/2</span></div>
+          <input id="cpkSearch" placeholder="🔍 搜索打手名字" style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card2,#fafafa);font-size:12px;font-family:inherit;outline:none;margin-bottom:6px" oninput="cpkSearch(this.value)">
+          <div class="filter-tabs" id="cpkTier" style="margin-bottom:8px">
+            <div class="ftab active" data-f="all" onclick="cpkTier('all')">全部</div>
+            <div class="ftab" data-f="文神" onclick="cpkTier('文神')">文神</div>
+            <div class="ftab" data-f="文叔" onclick="cpkTier('文叔')">文叔</div>
+            <div class="ftab" data-f="文哥" onclick="cpkTier('文哥')">文哥</div>
+            <div class="ftab" data-f="文宝宝" onclick="cpkTier('文宝宝')">文宝宝</div>
+          </div>
+          <div class="carry-pick" id="coCarryList" style="max-height:220px;overflow-y:auto"></div>
         </div>
         <div class="f">
           <label style="cursor:pointer;display:flex;align-items:center;gap:4px" onclick="toggleCoupon()">🎟️ 优惠券<span id="coCouponArrow" style="font-size:12px;color:var(--text2);transition:transform .2s;display:inline-block">›</span></label>
@@ -858,8 +867,11 @@ function renderCheckTotals(){const t=calcTotals();document.getElementById('coTot
 function hasPlayItem(){return ca.some(c=>c.category==='陪玩价格')}
 function randPool(){const all=carList();if(hasPlayItem())return all;return all.filter(x=>x.tier==='文哥'||x.tier==='文叔'||x.tier==='文神')}
 function doRand(){const pool=randPool().filter(x=>!selCarrys.includes(x.n));randCarry=pool.length?pool[Math.floor(Math.random()*pool.length)].n:''}
-function renderCarryList(){const l=document.getElementById('coCarryList');if(!l)return;const hasPlay=hasPlayItem();let list=carList();if(!hasPlay)list=list.filter(x=>x.tier==='文哥'||x.tier==='文叔'||x.tier==='文神');l.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:11px;color:var(--text2)">${hasPlay?'全部打手可选':'一般单 · 仅文哥以上可接'}</span><span style="font-size:11px;font-weight:600;color:var(--accent)">已选 ${selCarrys.length}/2</span></div>`+list.map(x=>{const sel=selCarrys.includes(x.n),rand=randCarry===x.n;return `<div class="carry-pick-item ${sel?'sel':''}" onclick="chooseCarry('${x.n}')"><div class="cpa">${x.avatar?`<img src="${x.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="${x.n}">`:x.n[0]}</div><div class="cpn"><div class="t">${x.n}${rand?'<span style="font-size:9px;color:var(--accent);background:#fff0f2;padding:1px 5px;border-radius:6px;margin-left:4px">🎲随机匹配</span>':''}<span class="stars"> ${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span></div><div class="s">${tierTag(x)} ${(x.t||[]).slice(0,1).join('')}</div></div></div>`}).join('')+`<div style="font-size:10px;color:var(--text2);margin-top:8px;line-height:1.6">最多选 2 位；只选 1 位时，另 1 位由系统随机匹配（${hasPlay?'全档位':'文哥以上'}），随机结果会直接显示在下面。</div>`}
-function pickCarry(on){carryOn=on;document.getElementById('cpk-no').classList.toggle('active',!on);document.getElementById('cpk-yes').classList.toggle('active',!!on);document.getElementById('coCarryBox').style.display=on?'block':'none';if(!on){selCarrys=[];randCarry=''}renderCarryList();renderCheckItems();renderCheckTotals()}
+let cpkQ='',cpkT='all';
+function renderCarryList(){const l=document.getElementById('coCarryList');if(!l)return;const hasPlay=hasPlayItem();let list=carList();if(!hasPlay)list=list.filter(x=>x.tier==='文哥'||x.tier==='文叔'||x.tier==='文神');if(cpkQ)list=list.filter(x=>x.n.includes(cpkQ));if(cpkT!=='all')list=list.filter(x=>x.tier===cpkT);const cnt=document.getElementById('cpkCount');if(cnt)cnt.textContent='已选 '+selCarrys.length+'/2';if(!list.length){l.innerHTML='<div class="empty" style="padding:22px 10px"><div class="ic">🔍</div><p>没有找到匹配的打手</p></div>';return}l.innerHTML=list.map(x=>{const sel=selCarrys.includes(x.n),rand=randCarry===x.n;return `<div class="carry-pick-item ${sel?'sel':''}" onclick="chooseCarry('${x.n}')"><div class="cpa">${x.avatar?`<img src="${x.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="${x.n}">`:x.n[0]}</div><div class="cpn"><div class="t">${x.n}${rand?'<span style="font-size:9px;color:var(--accent);background:#fff0f2;padding:1px 5px;border-radius:6px;margin-left:4px">🎲随机匹配</span>':''}<span class="stars"> ${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span></div><div class="s">${tierTag(x)} ${(x.t||[]).slice(0,1).join('')}</div></div></div>`}).join('')}
+function cpkSearch(v){cpkQ=(v||'').trim();renderCarryList()}
+function cpkTier(t){cpkT=t;document.querySelectorAll('#cpkTier .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===t));renderCarryList()}
+function pickCarry(on){carryOn=on;document.getElementById('cpk-no').classList.toggle('active',!on);document.getElementById('cpk-yes').classList.toggle('active',!!on);document.getElementById('coCarryBox').style.display=on?'block':'none';if(!on){selCarrys=[];randCarry=''}cpkQ='';cpkT='all';const se=document.getElementById('cpkSearch');if(se)se.value='';renderCarryList();renderCheckItems();renderCheckTotals()}
 function chooseCarry(n){const has=selCarrys.includes(n);if(has){selCarrys=selCarrys.filter(x=>x!==n)}else{if(selCarrys.length>=2){toast('最多选 2 位打手');return}selCarrys=[...selCarrys,n]}if(selCarrys.length===1)doRand();else randCarry='';renderCarryList();renderCheckItems();renderCheckTotals()}
 function applyCoupon(){
   const code=(document.getElementById('coCoupon').value||'').trim().toUpperCase();
