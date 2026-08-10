@@ -400,11 +400,11 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
   <div class="page" id="cc">
     <div class="section" style="padding-bottom:0"><div class="section-title">🎮 打手 <span class="more" id="ccount"></span></div>
       <div class="filter-tabs" id="coTier">
-        <div class="ftab active" onclick="fTier('all')">全部</div>
-        <div class="ftab" onclick="fTier('文神')">🏆文神</div>
-        <div class="ftab" onclick="fTier('文叔')">🛡️文叔</div>
-        <div class="ftab" onclick="fTier('文哥')">⚡文哥</div>
-        <div class="ftab" onclick="fTier('文宝宝')">🍬文宝宝</div>
+        <div class="ftab active" data-f="all" onclick="fTier('all')">全部</div>
+        <div class="ftab" data-f="文神" onclick="fTier('文神')">🏆文神</div>
+        <div class="ftab" data-f="文叔" onclick="fTier('文叔')">🛡️文叔</div>
+        <div class="ftab" data-f="文哥" onclick="fTier('文哥')">⚡文哥</div>
+        <div class="ftab" data-f="文宝宝" onclick="fTier('文宝宝')">🍬文宝宝</div>
       </div>
     </div>
     <div id="cclist"></div>
@@ -888,7 +888,8 @@ let tierF='all';
 function fTier(t){tierF=t;document.querySelectorAll('#coTier .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===t||(t==='all'&&!e.dataset.f)));rCarries()}
 function tierTag(c){const m=TIER_META[c.tier]||TIER_META['文哥'];return `<span class="tier-tag" style="--tc1:${m.c1};--tc2:${m.c2}">${m.ic} ${m.art}</span>`}
 function shuffled(l){const a=l.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
-function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="food-card" onclick="openPro('${c.n}')"><div class="fimg" style="font-size:28px">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" alt="">`:c.n[0]}<span style="position:absolute;top:6px;left:6px">${tierTag(c)}</span>${c.voice?`<button class="vbar" onclick="event.stopPropagation();pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button>`:''}</div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${(c.t||[]).slice(0,2).map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')||'<span style="font-size:9px;color:#ccc">暂无标签</span>'}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">${c.tier} · 完成 ${c.o} 单</div></div></div>`};let list=carList();if(tierF!=='all')list=list.filter(c=>c.tier===tierF);list=shuffled(list);document.getElementById('ccount').textContent=list.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${list.map(h).join('')}</div>`}
+    function carryOrder(){const all=carList();const key=all.map(x=>x.n).join(',');try{const c=sessionStorage.getItem('wv6corder');if(c){const d=JSON.parse(c);if(d&&d.v===key){const m={};all.forEach(x=>m[x.n]=x);const o=d.o.map(n=>m[n]).filter(Boolean);if(o.length===all.length)return o}}}catch(e){}const s=shuffled(all);try{sessionStorage.setItem('wv6corder',JSON.stringify({v:key,o:s.map(x=>x.n)}))}catch(e){}return s}
+function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="food-card" onclick="openPro('${c.n}')"><div class="fimg" style="font-size:28px">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" alt="">`:c.n[0]}<span style="position:absolute;top:6px;left:6px">${tierTag(c)}</span>${c.voice?`<button class="vbar" onclick="event.stopPropagation();pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button>`:''}</div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${(c.t||[]).slice(0,2).map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')||'<span style="font-size:9px;color:#ccc">暂无标签</span>'}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">${c.tier} · 完成 ${c.o} 单</div></div></div>`};let list=carryOrder();if(tierF!=='all')list=list.filter(c=>c.tier===tierF);document.getElementById('ccount').textContent=list.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${list.map(h).join('')}</div>`}
 function openPro(n){const c=carList().find(x=>x.n===n);if(!c)return;const m=TIER_META[c.tier]||TIER_META['文哥'];document.getElementById('proHero').style.background=`linear-gradient(135deg,${m.c1},${m.c2})`;document.getElementById('proTier').innerHTML=tierTag(c);document.getElementById('proAva').innerHTML=c.avatar?`<img src="${c.avatar}" alt="">`:c.n[0];document.getElementById('proName').textContent=c.n;document.getElementById('proStars').textContent='★'.repeat(c.s)+'☆'.repeat(5-c.s);document.getElementById('proTags').innerHTML=(c.t||[]).length?c.t.map(t=>`<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:var(--card2,#fafafa);color:var(--text2);margin-right:4px">${t}</span>`).join(''):'<span style="font-size:10px;color:#ccc">暂无标签</span>';document.getElementById('proOrders').textContent=c.o+' 单';const pv=document.getElementById('proVoice');if(c.voice){pv.innerHTML=`<div class="pro-voice"><button class="vbar" onclick="pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button><span style="font-size:10px;color:var(--text2)">点我听他说话</span></div>`}else{pv.innerHTML='<span style="font-size:10px;color:#ccc">该打手还没上传语音</span>'}curPro=n;swCust('pro')}
 let curPro='';
 function orderFromPro(){if(!curPro)return;pickCarry(1);chooseCarry(curPro);swCust('order');toast('已指定打手 '+curPro+'，加购后提交')}
@@ -913,7 +914,7 @@ function itName(i){if(!i)return'订单';if(i.category==='陪玩价格')return '�
 function rHotCarries(){
   const el=document.getElementById('hCarries');
   if(!el)return;
-  const top=shuffled(carList()).slice(0,8);
+  const top=carryOrder().slice(0,8);
   el.innerHTML=`<div class="h-scroll">${top.map(c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="h-carry" onclick="openPro('${c.n}')"><div class="ava">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="">`:c.n[0]}</div><div class="nm">${c.n}</div><div class="stars">${s}</div><div class="tag2">${c.tier}</div></div>`}).join('')}</div>`
 }
 let onlineN=18;
