@@ -773,6 +773,7 @@ const CR=[
 {n:'Ay',tier:'文哥',s:5,o:0,t:[]},{n:'老九',tier:'文哥',s:5,o:0,t:[]},{n:'地主',tier:'文哥',s:5,o:0,t:[]},{n:'小卿',tier:'文哥',s:5,o:0,t:[]},{n:'农民',tier:'文哥',s:5,o:0,t:[]},{n:'Lin',tier:'文哥',s:5,o:0,t:[]},{n:'小羊',tier:'文哥',s:5,o:0,t:[]},{n:'小轩',tier:'文哥',s:5,o:0,t:[]},{n:'呆呆王',tier:'文哥',s:5,o:0,t:[]},{n:'小梦',tier:'文哥',s:5,o:0,t:[]},{n:'搞完',tier:'文哥',s:5,o:0,t:[]},{n:'小洛',tier:'文哥',s:5,o:0,t:[]},{n:'基里连科',tier:'文哥',s:5,o:0,t:[]},{n:'小罗',tier:'文哥',s:5,o:0,t:[]},{n:'回忆泪',tier:'文哥',s:5,o:0,t:[]},{n:'柠檬',tier:'文哥',s:5,o:0,t:[]},{n:'调皮佬',tier:'文哥',s:5,o:0,t:[]},{n:'南瓜',tier:'文哥',s:5,o:0,t:[]},{n:'Young181',tier:'文哥',s:5,o:0,t:[]},
 {n:'小沫',tier:'文宝宝',s:5,o:0,t:[]},{n:'EVE',tier:'文宝宝',s:5,o:0,t:[]},{n:'小饱',tier:'文宝宝',s:5,o:0,t:[]},
 ];
+const LEGACY_CARRIERS=['小陈','阿豪','大鹏','阿杰','老李','小宇'];
 const TIER_META={'文神':{c1:'#8e44ad',c2:'#f1c40f',ic:'🏆',art:'文神'},'文叔':{c1:'#2980b9',c2:'#3498db',ic:'🛡️',art:'文叔'},'文哥':{c1:'#e94560',c2:'#ff6b6b',ic:'⚡',art:'文哥'},'文宝宝':{c1:'#fd79a8',c2:'#e84393',ic:'🍬',art:'文宝宝'}};
 const SL=[{b:'bg1',b2:'🛡️护航单 ¥98起',s2:'双护稳定保底·累计788W',t2:'🔥热门',e:'🛡️'},{b:'bg2',b2:'✨新老板体验 ¥99',s2:'一人一次·巴克什·保底888W',t2:'🎁新人',e:'✨'},{b:'bg3',b2:'💪勇敢者行动 ¥488',s2:'带密钥清图·保底888W',t2:'💎高端',e:'🔫'},{b:'bg4',b2:'🎲赌单局撤离 ¥300起',s2:'一局定胜负·1000W起',t2:'🎯刺激',e:'🎲'}];
 
@@ -783,7 +784,7 @@ function sv(){localStorage.setItem('wv6',JSON.stringify({orders:O,nid}))}
 
 // ===== 打手账号（管理端建号，存 wv6carriers） =====
 let CR2=[];
-function ldCar(){try{const ver=localStorage.getItem('wv6carver');if(ver!=='2'){const r=localStorage.getItem('wv6carriers');let old=r?JSON.parse(r):[];CR2=CR.map(x=>{const a=old.find(o=>o.n===x.n);return a?{n:x.n,pw:a.pw||'123456',t:a.t||[],avatar:a.avatar||'',voice:a.voice||'',vStatus:a.vStatus||0,tier:x.tier}:{n:x.n,pw:'123456',t:[],avatar:'',voice:'',vStatus:0,tier:x.tier}});old.forEach(a=>{if(!CR.some(x=>x.n===a.n))CR2.push(a)});localStorage.setItem('wv6carver','2');svCar()}else{const r=localStorage.getItem('wv6carriers');CR2=r?JSON.parse(r):[]}}catch(e){CR2=[]}}
+function ldCar(){try{const ver=localStorage.getItem('wv6carver');if(ver!=='3'){const r=localStorage.getItem('wv6carriers');let old=r?JSON.parse(r):[];CR2=CR.map(x=>{const a=old.find(o=>o.n===x.n);return a?{n:x.n,pw:a.pw||'123456',t:a.t||[],avatar:a.avatar||'',voice:a.voice||'',vStatus:a.vStatus||0,tier:x.tier}:{n:x.n,pw:'123456',t:[],avatar:'',voice:'',vStatus:0,tier:x.tier}});old.forEach(a=>{if(!CR.some(x=>x.n===a.n)&&!LEGACY_CARRIERS.includes(a.n))CR2.push(a)});localStorage.setItem('wv6carver','3');svCar()}else{const r=localStorage.getItem('wv6carriers');CR2=r?JSON.parse(r):[]}}catch(e){CR2=[]}}
 function svCar(){try{localStorage.setItem('wv6carriers',JSON.stringify(CR2));return true}catch(e){return false}}
 function carList(){const acc={};CR2.forEach(a=>acc[a.n]=a);const out=CR.map(x=>{const a=acc[x.n]||{};return{n:x.n,s:x.s,o:x.o,t:(a.t&&a.t.length)?a.t:x.t,v:x.v,tier:x.tier,avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0}});CR2.forEach(a=>{if(!CR.some(x=>x.n===a.n))out.push({n:a.n,s:a.s||5,o:0,t:a.t||[],v:true,tier:a.tier||'文哥',avatar:a.avatar||'',voice:(a.vStatus===2&&a.voice)?a.voice:'',vStatus:a.vStatus||0})});return out}
 let pvA=null,pvName='',pvTot={};
