@@ -11,7 +11,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 
 .header{background:rgba(255,255,255,.96);backdrop-filter:blur(16px);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.04);position:sticky;top:0;z-index:20}
 .header .logo{font-size:19px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:6px}
-.header .logo span{color:var(--accent)}
+.header .logo span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .header .role-switch{display:flex;gap:0;background:#f0f0f3;border-radius:20px;padding:2px;font-size:11px}
 .header .role-switch .r-btn{padding:4px 12px;border-radius:18px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-size:11px;font-weight:500;transition:.2s;font-family:inherit}
 .header .role-switch .r-btn.active{background:var(--card);color:var(--accent);box-shadow:var(--shadow)}
@@ -49,6 +49,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 .order-left{width:90px;flex-shrink:0;background:var(--card2,#fafafa);overflow-y:auto;border-right:1px solid var(--border);padding-bottom:60px}
 .order-left::-webkit-scrollbar{width:0}
 .order-cat{padding:16px 8px;text-align:center;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s;color:var(--text2);font-size:11px}
+.order-cat:hover{color:var(--text)}
 .order-cat .ci{font-size:22px;display:block;margin-bottom:2px}
 .order-cat.active{background:var(--card);color:var(--accent);font-weight:700;position:relative}
 .order-cat.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:22px;background:var(--accent);border-radius:0 3px 3px 0}
@@ -60,6 +61,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 /* 2列正方形卡片 */
 .food-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .food-card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);transition:.15s}
+.food-card:hover{box-shadow:0 2px 6px rgba(17,17,26,.08),0 12px 28px rgba(17,17,26,.08)}
 .food-card:active{transform:scale(.96)}
 .food-card .fimg{width:100%;aspect-ratio:1;background:linear-gradient(135deg,#fff0f0,#fff5f5);display:flex;align-items:center;justify-content:center;font-size:36px;color:#ddd;position:relative}
 .food-card .fimg .fhot{position:absolute;top:6px;left:6px;font-size:8px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#fff}
@@ -189,7 +191,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 .modal .btn-row button{flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
 .modal .btn-row .cancel{background:var(--card2,#fafafa);color:var(--text2)}
 
-.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:200;background:var(--card);border:1px solid var(--accent);color:var(--text);padding:8px 18px;border-radius:10px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:200;background:rgba(26,26,46,.88);color:#fff;padding:9px 20px;border-radius:12px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .toast.show{opacity:1}
 .home-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .home-quick > div{background:var(--card);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow);cursor:pointer;transition:.15s}
@@ -226,7 +228,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .h-order .tm{font-size:9px;color:var(--text2);margin-top:2px}
 .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .why-item{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
-.why-item .wi{font-size:24px}
+.why-item .wi{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:2px}
 .why-item .wl{font-size:12px;font-weight:600}
 .why-item .ws{font-size:9px;color:var(--text2)}
 
@@ -310,6 +312,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .pay-foot .amt .l{font-size:10px;color:var(--text2)}
 .pay-foot .amt .v{font-size:20px;font-weight:800;color:var(--accent)}
 .pay-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.pay-btn:hover{filter:brightness(1.06)}
 .pay-btn:active{transform:scale(.95)}
 .pay-btn:disabled{opacity:.6}
 .pay-success{text-align:center;padding:30px 20px}
@@ -405,10 +408,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <!-- 为什么选择我们 -->
       <div class="section-title" style="font-size:14px;margin-top:12px">💎 为什么选择我们</div>
       <div class="why-grid">
-        <div class="why-item"><div class="wi">🛡️</div><div class="wl">纯绿无挂</div><div class="ws">不开挂·不违规·纯手打</div></div>
-        <div class="why-item"><div class="wi">🎤</div><div class="wl">开麦聊天</div><div class="ws">全程语音·气氛拉满</div></div>
-        <div class="why-item"><div class="wi">💎</div><div class="wl">情绪价值</div><div class="ws">输赢都有人哄你</div></div>
-        <div class="why-item"><div class="wi">🏆</div><div class="wl">专业团队</div><div class="ws">认证打手·高胜率</div></div>
+        <div class="why-item"><div class="wi" style="background:#fff0f2">🛡️</div><div class="wl">纯绿无挂</div><div class="ws">不开挂·不违规·纯手打</div></div>
+        <div class="why-item"><div class="wi" style="background:#eef6ff">🎤</div><div class="wl">开麦聊天</div><div class="ws">全程语音·气氛拉满</div></div>
+        <div class="why-item"><div class="wi" style="background:#f3f0ff">💎</div><div class="wl">情绪价值</div><div class="ws">输赢都有人哄你</div></div>
+        <div class="why-item"><div class="wi" style="background:#fff8e6">🏆</div><div class="wl">专业团队</div><div class="ws">认证打手·高胜率</div></div>
       </div>
     </div>
   </div>
@@ -531,8 +534,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <div class="section" style="padding-bottom:120px">
       <div class="check-card">
         <div class="f" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:12px"><label>🧾 订单明细</label><div id="coItems"></div></div>
-        <div class="f"><label>🎮 游戏ID（三角洲UID / 游戏ID）<em>*</em></label><input id="coGameId" placeholder="请输入游戏ID" maxlength="32"></div>
-        <div class="f"><label>💬 微信号<em>*</em></label><input id="coWechat" placeholder="请输入微信号" maxlength="32"></div>
+        <div class="f"><label>🎮 游戏ID（三角洲UID / 游戏ID）<em>*</em></label><input id="coGameId" placeholder="请输入游戏ID" maxlength="32" autocomplete="off"></div>
+        <div class="f"><label>💬 微信号<em>*</em></label><input id="coWechat" placeholder="请输入微信号" maxlength="32" autocomplete="off"></div>
         <div class="f">
           <label>🎯 指定打手</label>
           <div class="pick-row">
@@ -833,7 +836,7 @@ r.innerHTML=`<div class="food-grid">${tks.map(tk=>{const it=p[tk];return `<div c
 
 function addC(ck,tk){const p=PT[ck]&&PT[ck][tk];if(!p){toast('暂不可用');return}const ex=ca.find(c=>c.category===ck&&c.tier===tk);if(ex){ex.qty=(ex.qty||1)+1}else{ca.push({category:ck,tier:tk,price:p.p,desc:p.n,qty:1})}uCart();toast(ck==='陪玩价格'?'已添加 1 小时':'已添加')}
 function uCart(){const b=document.getElementById('cartBar');if(role!=='customer'||curTab!=='order'||!ca.length){b.style.display='none';return}b.style.display='flex';const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0),n=ca.reduce((s,c)=>s+(c.qty||1),0);document.getElementById('ccnt').textContent=n;document.getElementById('ctot').textContent='¥'+t}
-function rp(){const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0);document.getElementById('cplist').innerHTML=ca.map((c,i)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">${c.category}·${tL[c.tier]||c.tier}</div><div style="font-size:10px;color:var(--text2)">${c.category==='陪玩价格'?((c.qty||1)+' 小时 · '):''}${c.desc}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="qtyctl"><button onclick="adj(${i},-1)">−</button><span>${c.qty||1}</span><button onclick="adj(${i},1)">+</button></div><div style="font-size:14px;font-weight:700;color:var(--accent);min-width:52px;text-align:right">¥${c.price*(c.qty||1)}</div><button style="width:22px;height:22px;border-radius:50%;border:none;background:var(--card2,#fafafa);color:var(--text2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center" onclick="rc(${i})">✕</button></div></div>`).join('');document.getElementById('cpt').textContent=t}
+function rp(){const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0);document.getElementById('cplist').innerHTML=ca.map((c,i)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">${c.category}·${tL[c.tier]||c.tier}</div><div style="font-size:10px;color:var(--text2)">${c.category==='陪玩价格'?((c.qty||1)+' 小时 · '):''}${c.desc}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="qtyctl"><button aria-label="减少数量" onclick="adj(${i},-1)">−</button><span>${c.qty||1}</span><button aria-label="增加数量" onclick="adj(${i},1)">+</button></div><div style="font-size:14px;font-weight:700;color:var(--accent);min-width:52px;text-align:right">¥${c.price*(c.qty||1)}</div><button aria-label="删除该商品" style="width:22px;height:22px;border-radius:50%;border:none;background:var(--card2,#fafafa);color:var(--text2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center" onclick="rc(${i})">✕</button></div></div>`).join('');document.getElementById('cpt').textContent=t}
 function closeCart(){const p=document.getElementById('cp2'),o=document.getElementById('co2');if(p)p.classList.remove('show');if(o)o.classList.remove('show')}
 function tc(){if(!ca.length){toast('购物车为空');return}const p=document.getElementById('cp2'),o=document.getElementById('co2');if(p.classList.contains('show')){closeCart();return}rp();p.classList.add('show');o.classList.add('show')}
 function adj(i,d){const c=ca[i];if(!c)return;if(d<0&&(c.qty||1)<=1)return;c.qty=(c.qty||1)+d;uCart();rp()}
