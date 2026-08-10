@@ -127,6 +127,18 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 .filter-tabs::-webkit-scrollbar{height:0}
 .filter-tabs .ftab{padding:4px 10px;border-radius:14px;font-size:11px;cursor:pointer;white-space:nowrap;background:var(--card2,#fafafa);color:var(--text2);transition:.2s;font-weight:500}
 .filter-tabs .ftab.active{background:var(--accent);color:#fff}
+.filter-funnel{position:relative;margin-left:auto;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);background:var(--card2,#fafafa);border:1px solid var(--border);flex-shrink:0}
+.filter-funnel:active{background:#f0f0f0}
+.filter-funnel svg{width:15px;height:15px}
+.filter-funnel .fdot{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--accent);border:1.5px solid #fff;box-shadow:0 0 4px rgba(233,69,96,.5)}
+.fgroup{margin-bottom:14px}
+.fgroup .fgt{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px}
+.fopts{display:flex;flex-wrap:wrap;gap:8px}
+.fopt{display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:20px;background:var(--card2,#fafafa);border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;transition:.15s;user-select:none}
+.fopt .cb{width:16px;height:16px;border-radius:5px;border:1.5px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;background:#fff;flex-shrink:0;transition:.15s}
+.fopt.on{border-color:var(--accent);background:#fff5f7;color:var(--accent);font-weight:600}
+.fopt.on .cb{background:var(--accent);border-color:var(--accent)}
+.fopt .tdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
 .order-card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:var(--shadow)}
 .order-card .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
@@ -398,15 +410,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
 
   <!-- 打手 -->
   <div class="page" id="cc">
-    <div class="section" style="padding-bottom:0"><div class="section-title">🎮 打手 <span class="more" id="ccount"></span></div>
-      <div class="filter-tabs" id="coTier">
-        <div class="ftab active" data-f="all" onclick="fTier('all')">全部</div>
-        <div class="ftab" data-f="文神" onclick="fTier('文神')">🏆文神</div>
-        <div class="ftab" data-f="文叔" onclick="fTier('文叔')">🛡️文叔</div>
-        <div class="ftab" data-f="文哥" onclick="fTier('文哥')">⚡文哥</div>
-        <div class="ftab" data-f="文宝宝" onclick="fTier('文宝宝')">🍬文宝宝</div>
-      </div>
-    </div>
+    <div class="section" style="padding-bottom:0"><div class="section-title">🎮 打手 <span class="more" id="ccount"></span>
+      <span class="filter-funnel" onclick="openFilter()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg><span class="fdot" id="coFdot" style="display:none"></span></span>
+    </div></div>
     <div id="cclist"></div>
   </div>
 
@@ -732,6 +738,13 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-s
   <div class="btn-row"><button class="bo" onclick="reOrderLast()">🔄 再来一单</button><button class="ba" onclick="payDone()">完成</button></div>
 </div></div>
 
+<div class="modal-overlay" id="mFl" onclick="cm('mFl')"><div class="modal" onclick="event.stopPropagation()">
+  <div class="mtitle">筛选</div>
+  <div class="fgroup"><div class="fgt">档次</div><div class="fopts" id="flTier"></div></div>
+  <div class="fgroup" id="flTagGroup" style="display:none"><div class="fgt">标签</div><div class="fopts" id="flTag"></div></div>
+  <div class="btn-row"><button class="cancel" onclick="flReset()">重置</button><button class="ba" onclick="flApply()">确定</button></div>
+</div></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -884,12 +897,18 @@ function payDone(){
   ca=[];curCoupon=null;checkInfo={};uCart();tc();sv();rAll();toast('✅ 支付成功，下单完成！');swCust('myorders')
 }
 
-let tierF='all';
-function fTier(t){tierF=t;document.querySelectorAll('#coTier .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===t||(t==='all'&&!e.dataset.f)));rCarries()}
+const FILTER_TAGS=[];
+let tierSel=[],tagSel=[];
+function openFilter(){flRender();document.getElementById('mFl').classList.add('show')}
+function flRender(){const tiers=Object.keys(TIER_META);document.getElementById('flTier').innerHTML=tiers.map(t=>{const m=TIER_META[t];const on=tierSel.includes(t);return `<div class="fopt ${on?'on':''}" onclick="flToggle('${t}','tier')"><span class="cb">${on?'✓':''}</span><span class="tdot" style="background:${m.c1}"></span>${m.ic} ${m.art}</div>`}).join('');const tg=document.getElementById('flTagGroup');if(FILTER_TAGS.length){tg.style.display='';document.getElementById('flTag').innerHTML=FILTER_TAGS.map(t=>{const on=tagSel.includes(t);return `<div class="fopt ${on?'on':''}" onclick="flToggle('${t}','tag')"><span class="cb">${on?'✓':''}</span>${t}</div>`}).join('')}else{tg.style.display='none'}}
+function flToggle(v,k){if(k==='tier'){tierSel=tierSel.includes(v)?tierSel.filter(x=>x!==v):[...tierSel,v]}else{tagSel=tagSel.includes(v)?tagSel.filter(x=>x!==v):[...tagSel,v]}flRender()}
+function flReset(){tierSel=[];tagSel=[];flRender()}
+function flApply(){cm('mFl');rCarries()}
+function flDot(){const fn=document.getElementById('coFdot');if(fn)fn.style.display=(tierSel.length||tagSel.length)?'block':'none'}
 function tierTag(c){const m=TIER_META[c.tier]||TIER_META['文哥'];return `<span class="tier-tag" style="--tc1:${m.c1};--tc2:${m.c2}">${m.ic} ${m.art}</span>`}
 function shuffled(l){const a=l.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
     function carryOrder(){const all=carList();const key=all.map(x=>x.n).join(',');try{const c=sessionStorage.getItem('wv6corder');if(c){const d=JSON.parse(c);if(d&&d.v===key){const m={};all.forEach(x=>m[x.n]=x);const o=d.o.map(n=>m[n]).filter(Boolean);if(o.length===all.length)return o}}}catch(e){}const s=shuffled(all);try{sessionStorage.setItem('wv6corder',JSON.stringify({v:key,o:s.map(x=>x.n)}))}catch(e){}return s}
-function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="food-card" onclick="openPro('${c.n}')"><div class="fimg" style="font-size:28px">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" alt="">`:c.n[0]}<span style="position:absolute;top:6px;left:6px">${tierTag(c)}</span>${c.voice?`<button class="vbar" onclick="event.stopPropagation();pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button>`:''}</div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${(c.t||[]).slice(0,2).map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')||'<span style="font-size:9px;color:#ccc">暂无标签</span>'}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">${c.tier} · 完成 ${c.o} 单</div></div></div>`};let list=carryOrder();if(tierF!=='all')list=list.filter(c=>c.tier===tierF);document.getElementById('ccount').textContent=list.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${list.map(h).join('')}</div>`}
+function rCarries(){const h=c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="food-card" onclick="openPro('${c.n}')"><div class="fimg" style="font-size:28px">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" alt="">`:c.n[0]}<span style="position:absolute;top:6px;left:6px">${tierTag(c)}</span>${c.voice?`<button class="vbar" onclick="event.stopPropagation();pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button>`:''}</div><div class="finfo"><div class="fnm">${c.n}</div><div class="fdesc" style="margin-top:2px">${s}</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${(c.t||[]).slice(0,2).map(t=>`<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--card2,#fafafa);color:var(--text2)">${t}</span>`).join('')||'<span style="font-size:9px;color:#ccc">暂无标签</span>'}</div><div style="font-size:10px;color:var(--text2);margin-top:4px">${c.tier} · 完成 ${c.o} 单</div></div></div>`};let list=carryOrder();if(tierSel.length)list=list.filter(c=>tierSel.includes(c.tier));if(tagSel.length)list=list.filter(c=>(c.t||[]).some(t=>tagSel.includes(t)));flDot();document.getElementById('ccount').textContent=list.length+'位';document.getElementById('cclist').innerHTML=`<div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">${list.map(h).join('')}</div>`}
 function openPro(n){const c=carList().find(x=>x.n===n);if(!c)return;const m=TIER_META[c.tier]||TIER_META['文哥'];document.getElementById('proHero').style.background=`linear-gradient(135deg,${m.c1},${m.c2})`;document.getElementById('proTier').innerHTML=tierTag(c);document.getElementById('proAva').innerHTML=c.avatar?`<img src="${c.avatar}" alt="">`:c.n[0];document.getElementById('proName').textContent=c.n;document.getElementById('proStars').textContent='★'.repeat(c.s)+'☆'.repeat(5-c.s);document.getElementById('proTags').innerHTML=(c.t||[]).length?c.t.map(t=>`<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:var(--card2,#fafafa);color:var(--text2);margin-right:4px">${t}</span>`).join(''):'<span style="font-size:10px;color:#ccc">暂无标签</span>';document.getElementById('proOrders').textContent=c.o+' 单';const pv=document.getElementById('proVoice');if(c.voice){pv.innerHTML=`<div class="pro-voice"><button class="vbar" onclick="pv('${c.n}')"><span class="vic" id="vic-${c.n}">🔊</span><span class="vprog"><span class="vfill" id="vfill-${c.n}"></span></span><span class="vtime" id="vtime-${c.n}">--</span></button><span style="font-size:10px;color:var(--text2)">点我听他说话</span></div>`}else{pv.innerHTML='<span style="font-size:10px;color:#ccc">该打手还没上传语音</span>'}curPro=n;swCust('pro')}
 let curPro='';
 function orderFromPro(){if(!curPro)return;pickCarry(1);chooseCarry(curPro);swCust('order');toast('已指定打手 '+curPro+'，加购后提交')}
