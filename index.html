@@ -209,8 +209,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .quick-item{transition:transform .15s ease}
 .quick-item:active{transform:scale(.94)}
 .quick-item .qic{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 6px}
-.why-item{transition:transform .15s ease}
-.why-item:active{transform:scale(.96)}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 .h-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;overscroll-behavior-x:contain}
 .h-scroll::-webkit-scrollbar{display:none}
@@ -226,11 +224,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .h-order .hst{margin:5px 0}
 .h-order .price{font-size:15px;font-weight:700;color:var(--accent)}
 .h-order .tm{font-size:9px;color:var(--text2);margin-top:2px}
-.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.why-item{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
-.why-item .wi{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:2px}
-.why-item .wl{font-size:12px;font-weight:600}
-.why-item .ws{font-size:9px;color:var(--text2)}
+
 
 /* ===== 常见问题 ===== */
 .faq-top{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
@@ -385,11 +379,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <div class="section" style="padding-top:12px">
       <div class="carousel"><div class="carousel-inner" id="ci"></div></div>
       <div class="carousel-dots" id="cd"></div>
-      <!-- 在线人数 -->
-      <div class="online-bar">
-        <div style="display:flex;align-items:center;gap:8px"><span class="pulse-dot"></span><span style="font-size:12px;color:var(--text2)">当前在线</span></div>
-        <div style="display:flex;align-items:baseline;gap:2px"><span style="font-size:20px;font-weight:800;color:var(--accent)" id="hOnline">0</span><span style="font-size:10px;color:var(--text2)">人</span></div>
-      </div>
       <!-- Stats -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px">
         <div class="stat-card" style="background:var(--card);border-radius:12px;padding:10px;text-align:center;box-shadow:var(--shadow)"><div style="font-size:20px;font-weight:700;color:var(--accent)" id="hSettled">0</div><div style="font-size:10px;color:var(--text2)">已结账</div></div>
@@ -407,14 +396,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <!-- 热门打手 -->
       <div class="section-title" style="font-size:14px">🔥 热门打手 <span style="margin-left:auto;font-size:10px;font-weight:400;color:var(--text2);cursor:pointer" onclick="swCust('carries')">查看全部 ›</span></div>
       <div id="hCarries"></div>
-      <!-- 为什么选择我们 -->
-      <div class="section-title" style="font-size:14px;margin-top:12px">💎 为什么选择我们</div>
-      <div class="why-grid">
-        <div class="why-item"><div class="wi" style="background:#fff0f2">🛡️</div><div class="wl">纯绿无挂</div><div class="ws">不开挂·不违规·纯手打</div></div>
-        <div class="why-item"><div class="wi" style="background:#eef6ff">🎤</div><div class="wl">开麦聊天</div><div class="ws">全程语音·气氛拉满</div></div>
-        <div class="why-item"><div class="wi" style="background:#f3f0ff">💎</div><div class="wl">情绪价值</div><div class="ws">输赢都有人哄你</div></div>
-        <div class="why-item"><div class="wi" style="background:#fff8e6">🏆</div><div class="wl">专业团队</div><div class="ws">认证打手·高胜率</div></div>
-      </div>
     </div>
   </div>
 
@@ -981,9 +962,6 @@ function rHotCarries(){
   const top=carryOrder().slice(0,8);
   el.innerHTML=`<div class="h-scroll">${top.map(c=>{const s='★'.repeat(c.s)+'☆'.repeat(5-c.s);return `<div class="h-carry" onclick="openPro('${c.n}')"><div class="ava" style="background:linear-gradient(135deg,${TIER_META[c.tier]?.c1||'#e94560'},${TIER_META[c.tier]?.c2||'#ff6b6b'})">${c.avatar?`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="${c.n}">`:c.n[0]}</div><div class="nm">${c.n}</div><div class="stars">${s}</div><div class="tag2">${c.tier}</div></div>`}).join('')}</div>`
 }
-let onlineN=18;
-function rOnline(){const el=document.getElementById('hOnline');if(el)el.textContent=onlineN}
-setInterval(()=>{onlineN=Math.max(8,Math.min(66,onlineN+Math.floor(Math.random()*9)-4));rOnline()},3000);
 function rAll(){rHome();rCust();rPro();rDash();rAdmO();rStats();rCarries();rHotCarries();if(role==='carrier'&&csess())rCarAll();rAC();rAV()}
 
 function rCust(){const el=document.getElementById('col');let l=O.filter(o=>o.customer==='我').sort((a,b)=>b.id-a.id);if(cf!=='all')l=l.filter(o=>o.status===cf);if(!l.length){el.innerHTML='<div class="empty"><div class="ic">📭</div><p>暂无订单</p></div>';return}el.innerHTML=l.map(o=>{const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';return `<div class="order-card"><div class="top"><div class="svc">${its}</div><span class="st ${si.c}">${si.l}</span></div>${o.note?`<div class="desc">📝${o.note}</div>`:''}<div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${o.status==='done'?`<div class="actions"><button class="ba" onclick="reOrder(${o.id})">🔄 再来一单</button></div>`:''}</div>`}).join('')}
@@ -1079,7 +1057,7 @@ function tf(el){el.classList.toggle('open')}
 let toastT=null;
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');if(toastT)clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200)}
 
-ld();ldCar();rCar();rMenu();rCarries();rHotCarries();rOnline();rAll();
+ld();ldCar();rCar();rMenu();rCarries();rHotCarries();rAll();
 </script>
 </body>
 </html>
