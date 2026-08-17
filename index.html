@@ -318,6 +318,26 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .pay-success .sbox div{display:flex;justify-content:space-between;padding:5px 0}
 .pay-success .sbox b{color:var(--text);font-weight:600}
 
+/* ===== 商品详情落地页 ===== */
+.fun-top{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.fun-top .fbk{background:none;border:none;font-size:16px;color:var(--text2);cursor:pointer;padding:0 6px;font-family:inherit}
+.fun-top .ftt{font-size:15px;font-weight:700}
+.fun-poster{position:relative;width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#e94560,#ff6b6b 55%,#f0b90b);display:flex;align-items:center;justify-content:center;color:#fff;overflow:hidden}
+.fun-poster .ph{text-align:center;z-index:1;padding:20px}
+.fun-poster .ph-ic{font-size:40px}
+.fun-poster .ph-t{font-size:22px;font-weight:800;letter-spacing:4px;margin-top:6px;text-shadow:0 2px 10px rgba(0,0,0,.2)}
+.fun-poster .ph-s{font-size:12px;margin-top:4px;opacity:.92}
+.fun-poster .ph-tag{display:inline-block;margin-top:10px;font-size:9px;background:rgba(255,255,255,.22);padding:3px 12px;border-radius:12px}
+.fun-rules{list-style:none;margin-top:2px}
+.fun-rules li{font-size:12px;color:var(--text2);line-height:1.9;position:relative;padding-left:12px;margin-bottom:6px}
+.fun-rules li::before{content:'';position:absolute;left:0;top:9px;width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.fun-entry{background:linear-gradient(135deg,#e94560,#ff6b6b);border-radius:16px;padding:22px 18px;color:#fff;text-align:center;cursor:pointer;box-shadow:var(--shadow);margin-top:6px}
+.fun-entry:active{transform:scale(.96)}
+.fun-entry .fe-ic{font-size:34px}
+.fun-entry .fe-t{font-size:18px;font-weight:800;margin-top:6px;letter-spacing:2px}
+.fun-entry .fe-d{font-size:11px;opacity:.85;margin-top:4px}
+.fun-entry .fe-go{display:inline-block;margin-top:10px;font-size:11px;font-weight:600;background:rgba(255,255,255,.2);padding:6px 18px;border-radius:20px}
+
 /* ===== 打手端 ===== */
 .vbtn{display:inline-flex;align-items:center;gap:4px;font-size:9px;padding:2px 8px;border-radius:10px;background:#fff0f0;color:var(--accent);cursor:pointer;border:none;font-family:inherit;font-weight:600}
 .vbtn:active{transform:scale(.94)}
@@ -508,6 +528,48 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         </ul></div>
       </div>
       <div class="faq-note">其他问题可咨询客服微信：WengeDJ_01</div>
+    </div>
+  </div>
+
+  <!-- 商品详情落地页（通用：海报+服务说明/规则+底部悬停下单） -->
+  <div class="page" id="cfun">
+    <div class="fun-top"><button class="fbk" onclick="swCust('order')">←</button><span class="ftt" id="detTitle">商品详情</span></div>
+    <div class="fun-poster" id="funPoster">
+      <img id="funPosterImg" alt="海报" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+      <div class="ph">
+        <div class="ph-ic" id="detEmoji">🎁</div>
+        <div class="ph-t" id="detBigName">商品名称</div>
+        <div class="ph-s" id="detBigDesc"></div>
+        <div class="ph-tag">📌 海报位 · 待老大提供图片</div>
+      </div>
+    </div>
+    <div class="section" style="padding-bottom:120px">
+      <div class="check-card" style="margin-bottom:10px">
+        <div class="f" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:17px;font-weight:800" id="detName"></div>
+          <div style="font-size:10px;color:var(--text2)" id="detMeta"></div>
+        </div>
+        <div class="f"><label>💰 选择档位</label>
+          <div class="pick-row" id="detTiers"></div>
+        </div>
+        <div class="f" style="margin-bottom:0"><label>📋 服务内容</label>
+          <div style="font-size:12px;color:var(--text2);line-height:1.9" id="detIntro"></div>
+        </div>
+      </div>
+      <div class="check-card" style="margin-bottom:10px">
+        <div class="f" style="margin-bottom:0"><label>📜 规则</label>
+          <ul class="fun-rules" id="detRules"></ul>
+        </div>
+      </div>
+      <div class="check-card">
+        <div class="f" style="margin-bottom:0"><label>⚠️ 注意事项</label>
+          <ul class="fun-rules" style="--accent:#e67e22" id="detNotes"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="pay-foot">
+      <div class="amt"><div class="l">立即下单</div><div class="v" id="detAmt">¥0</div></div>
+      <button class="pay-btn" onclick="detOrder()">立即下单</button>
     </div>
   </div>
 
@@ -822,17 +884,48 @@ function sel(i){cur=i;document.querySelectorAll('.order-cat').forEach((e,j)=>e.c
 function pPlayHtml(){const rows=[['文宝宝',40],['文哥',60],['文叔',80],['文神',140],['双陪',280]];return `<div class="food-grid">${rows.map(x=>`<div class="food-card"><div class="fimg" style="font-size:20px;font-weight:700;color:#c9c9cf">${x[0]}</div><div class="finfo"><div class="fnm">陪玩<span class="fp">¥${x[1]}/时</span></div><div class="fdesc">${x[0]==='双陪'?'双陪 · 统一价':'单陪 · 每小时'}</div><div class="fbtns"><span class="fsales"></span><button class="addb" onclick="addC('陪玩价格','${x[0]}')">+</button></div></div></div>`).join('')}</div><div class="ptable-note" style="margin-top:10px"><strong>人头数说明（每小时）：</strong>文哥 5 人 · 文叔 7 人 · 文神 9 人 · 女老板减 1 人。<br><strong>文宝宝：</strong>娱乐陪，无要求。<br><strong>双陪：</strong>两位陪玩同时带（一队三人），统一价 ¥280/小时。<br>下单方式：点卡片上的 + 号，点一次 = 1 小时。</div>`}
 function renderI(idx){const r=document.getElementById('or');const c=CAT[idx];if(c.k==='陪玩价格'){r.innerHTML=pPlayHtml();return}const p=PT[c.k];if(!p||!Object.keys(p).length){r.innerHTML=`<div class="empty" style="padding:50px 10px"><div class="ic"></div><p>趣味单待添加</p><p style="font-size:10px;color:#ccc">联系管理员</p></div>`;return}
 const tks=Object.keys(p);
-r.innerHTML=`<div class="food-grid">${tks.map(tk=>{const it=p[tk];return `<div class="food-card"><div class="fimg" style="font-size:20px;font-weight:700;color:#c9c9cf">${tL[tk]||tk}</div><div class="finfo"><div class="fnm">${c.n}<span class="fp">¥${it.p}</span></div><div class="fdesc">${tL[tk]||tk} · ${it.n}</div><div class="fbtns"><span class="fsales"></span><button class="addb" onclick="addC('${c.k}','${tk}')">+</button></div></div></div>`}).join('')}</div>`}
+r.innerHTML=`<div class="food-grid">${tks.map(tk=>{const it=p[tk];return `<div class="food-card" onclick="openDet('${c.k}','${tk}')"><div class="fimg" style="font-size:20px;font-weight:700;color:#c9c9cf">${tL[tk]||tk}</div><div class="finfo"><div class="fnm">${c.n}<span class="fp">¥${it.p}</span></div><div class="fdesc">${tL[tk]||tk} · ${it.n}</div><div class="fbtns"><span class="fsales"></span><button class="addb" onclick="event.stopPropagation();addC('${c.k}','${tk}')">+</button></div></div></div>`}).join('')}</div>`}
+
+// ===== 商品详情落地页（通用） =====
+// 规则/注意事项 = 服务器版 PD 数据同步（2026-08-17）
+const DET_INFO={
+'护航单':{ic:'🛡️',id:'WG-HH',intro:'双护护航 · 稳定保底',rules:['双打手护航，稳定保底','保底按档次：体验788W / 标准1288W / 高级2088W / 豪华2888W','时长按第一把游戏开局时间开始计算，续费默认前一个小时没问题','半小时内有问题（陪玩原因）可以免费换人'],notes:['下单需填写游戏ID、微信号','撤离率赔付售后期限为24小时内，连坐追缴期限7天内','如遇外挂、游戏BUG、老板不听指挥、要求猛攻打法，当局无赔付','老板账号为黑屋状态，单陪人头数-2','具体规则以《老板点单须知》为准']},
+'潮汐监狱':{ic:'🌊',id:'WG-CX',intro:'高强度护航 · 累计保底',rules:['高强度护航，稳定保底','保底按档次：体验788W / 标准1488W / 高级2088W / 豪华2888W','时长按第一把游戏开局时间开始计算，续费默认前一个小时没问题','半小时内有问题（陪玩原因）可以免费换人'],notes:['下单需填写游戏ID、微信号','撤离率赔付售后期限为24小时内，连坐追缴期限7天内','如遇外挂、游戏BUG、老板不听指挥、要求猛攻打法，当局无赔付','老板账号为黑屋状态，单陪人头数-2','具体规则以《老板点单须知》为准']},
+'勇敢者行动':{ic:'💪',id:'WG-YG',intro:'带密钥清图 · 累计保底',rules:['带密钥清图，累计保底888W','高端局专属玩法，请提前确认装备','时长按第一把游戏开局时间开始计算'],notes:['下单需填写游戏ID、微信号','撤离率赔付售后期限为24小时内','如遇外挂、游戏BUG，当局无赔付','具体规则以《老板点单须知》为准']},
+'赌单局撤离':{ic:'🎲',id:'WG-DD',intro:'一局定胜负 · 单局撤出',rules:['一局定胜负，单局撤出：体验1000W / 标准1100W / 高级1200W / 豪华1300W','撤离成功即结算，不撤不结算','时长按第一把游戏开局时间开始计算'],notes:['下单需填写游戏ID、微信号','撤离率赔付售后期限为24小时内','如遇外挂、游戏BUG，当局无赔付','具体规则以《老板点单须知》为准']},
+'体验单':{ic:'✨',id:'WG-TY',intro:'新老板专属 · 一人一次',rules:['一人一次，新老板专属体验','巴克什·保底888W','时长按第一把游戏开局时间开始计算'],notes:['下单需填写游戏ID、微信号','具体规则以《老板点单须知》为准']},
+'陪玩价格':{ic:'🎮',id:'WG-PW',intro:'单陪 / 双陪 · 按小时下单',rules:['按小时计费：文宝宝¥40 / 文哥¥60 / 文叔¥80 / 文神¥140','双陪统一 ¥280/小时（两位陪玩同带，一队三人）','一陪二（一个打手陪两个客户）需加20元','半小时内有问题（陪玩原因）可以免费换人','文宝宝为娱乐陪，不接受技术投诉'],notes:['人头数（每小时）：文哥5人 / 文叔7人 / 文神9人 / 女老板减1人','文宝宝无要求','下单需填写游戏ID、微信号','具体规则以《老板点单须知》为准']}
+};
+let detCk='',detTk='',detPrice=0;
+function openDet(ck,tk){
+  const p=PT[ck];const it=p&&p[tk];if(!it){toast('暂不可用');return}
+  detCk=ck;detTk=tk;detPrice=it.p;
+  const info=DET_INFO[ck]||{ic:'🎁',id:'WG-'+ck,intro:it.n||'',rules:['具体规则待老大提供后替换']};
+  document.getElementById('detTitle').textContent=ck;
+  document.getElementById('detEmoji').textContent=info.ic||'🎁';
+  document.getElementById('detBigName').textContent=ck;
+  document.getElementById('detBigDesc').textContent=info.intro||'';
+  document.getElementById('detName').textContent=(info.ic||'')+' '+ck;
+  document.getElementById('detMeta').textContent='商品ID：'+(info.id||'WG-XX')+' · 已售 0 单';
+  document.getElementById('detIntro').innerHTML=Object.keys(p).map(tk2=>{const i=p[tk2];return `<b>${tL[tk2]||tk2}</b>（¥${i.p}）：${i.n}`}).join('<br>');
+  document.getElementById('detRules').innerHTML=(info.rules||[]).map(r=>`<li>${r}</li>`).join('');
+  document.getElementById('detNotes').innerHTML=(info.notes||[]).map(n=>`<li>${n}</li>`).join('');
+  document.getElementById('detTiers').innerHTML=Object.keys(p).map(tk2=>`<div class="pick-btn ${tk2===tk?'active':''}" data-tk="${tk2}" onclick="detPickTier('${tk2}')">${tL[tk2]||tk2}<small style="display:block;font-size:9px;color:var(--text2);margin-top:2px">¥${p[tk2].p}</small></div>`).join('');
+  document.getElementById('detAmt').textContent='¥'+it.p;
+  swCust('fun');
+}
+function detPickTier(tk){const it=PT[detCk]&&PT[detCk][tk];if(!it)return;detTk=tk;detPrice=it.p;document.querySelectorAll('#detTiers .pick-btn').forEach(b=>b.classList.toggle('active',b.dataset.tk===tk));document.getElementById('detAmt').textContent='¥'+it.p}
+function detOrder(){ca=ca.filter(c=>!(c.category===detCk&&c.tier===detTk));ca.push({category:detCk,tier:detTk,price:detPrice,desc:(PT[detCk]&&PT[detCk][detTk]&&PT[detCk][detTk].n)||'',qty:1});uCart();sc();toast('✅ 已加入：'+detCk+'·'+(tL[detTk]||detTk)+' ¥'+detPrice)}
 
 function addC(ck,tk){const p=PT[ck]&&PT[ck][tk];if(!p){toast('暂不可用');return}const ex=ca.find(c=>c.category===ck&&c.tier===tk);if(ex){ex.qty=(ex.qty||1)+1}else{ca.push({category:ck,tier:tk,price:p.p,desc:p.n,qty:1})}uCart();toast(ck==='陪玩价格'?'已添加 1 小时':'已添加')}
 function uCart(){const b=document.getElementById('cartBar');if(role!=='customer'||curTab!=='order'||!ca.length){b.style.display='none';return}b.style.display='flex';const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0),n=ca.reduce((s,c)=>s+(c.qty||1),0);document.getElementById('ccnt').textContent=n;document.getElementById('ctot').textContent='¥'+t}
 function rp(){const t=ca.reduce((s,c)=>s+c.price*(c.qty||1),0);document.getElementById('cplist').innerHTML=ca.map((c,i)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">${c.category}·${tL[c.tier]||c.tier}</div><div style="font-size:10px;color:var(--text2)">${c.category==='陪玩价格'?((c.qty||1)+' 小时 · '):''}${c.desc}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="qtyctl"><button aria-label="减少数量" onclick="adj(${i},-1)">−</button><span>${c.qty||1}</span><button aria-label="增加数量" onclick="adj(${i},1)">+</button></div><div style="font-size:14px;font-weight:700;color:var(--accent);min-width:52px;text-align:right">¥${c.price*(c.qty||1)}</div><button aria-label="删除该商品" style="width:22px;height:22px;border-radius:50%;border:none;background:var(--card2,#fafafa);color:var(--text2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center" onclick="rc(${i})">✕</button></div></div>`).join('');document.getElementById('cpt').textContent=t}
 function closeCart(){const p=document.getElementById('cp2'),o=document.getElementById('co2');if(p)p.classList.remove('show');if(o)o.classList.remove('show')}
 function tc(){if(!ca.length){toast('购物车为空');return}const p=document.getElementById('cp2'),o=document.getElementById('co2');if(p.classList.contains('show')){closeCart();return}rp();p.classList.add('show');o.classList.add('show')}
-function adj(i,d){const c=ca[i];if(!c)return;if(d<0&&(c.qty||1)<=1)return;c.qty=(c.qty||1)+d;uCart();rp()}
+function adj(i,d){const c=ca[i];if(!c)return;if(d<0&&(c.qty||1)<=1){rc(i);return}c.qty=(c.qty||1)+d;uCart();rp()}
 function rc(i){ca.splice(i,1);uCart();rp()}
 function cc2(){ca=[];uCart();rp()}
-let payTotal=0,payFinal=0,payMethod='wx',curCoupon=null,checkInfo={},carryOn=0,selCarrys=[],randCarry='',lastItems=[],lastCarry=[];
+let payTotal=0,payFinal=0,payMethod='wx',curCoupon=null,checkInfo={},carryOn=0,selCarrys=[],lastItems=[],lastCarry=[];
 function carryNames(){const l=selCarrys.slice();return l}
 function playAdj(){if(!carryOn)return null;const names=carryNames();if(!names.length)return null;const items=ca.filter(c=>c.category==='陪玩价格');if(!items.length)return null;return{unit:names.reduce((s,n)=>{const a=carList().find(x=>x.n===n);return s+(a?(CARRY_RATE[a.tier]||0):0)},0),qty:items.reduce((s,c)=>s+(c.qty||1),0)}}
 function calcTotals(){const adj=playAdj();let orig=0;ca.forEach(c=>{if(c.category==='陪玩价格'&&adj){orig+=adj.unit*(c.qty||1)}else{orig+=c.price*(c.qty||1)}});let d=0;if(curCoupon){if(curCoupon.type==='discount')d=Math.round(orig*(1-curCoupon.rate)*100)/100;else if(orig>=curCoupon.threshold)d=curCoupon.amount}return{orig:orig,d:d,pay:Math.max(0,orig-d)}}
@@ -847,13 +940,13 @@ function renderCheck(){
 function renderCheckTotals(){const t=calcTotals();document.getElementById('coTotal').innerHTML=t.d>0?'¥'+t.pay+' <span style="text-decoration:line-through;color:#bbb;font-size:12px;font-weight:400">¥'+t.orig+'</span>':'¥'+t.orig}
 function hasPlayItem(){return ca.some(c=>c.category==='陪玩价格')}
 function randPool(){const all=carList();if(hasPlayItem())return all;return all.filter(x=>x.tier==='文哥'||x.tier==='文叔'||x.tier==='文神')}
-function doRand(){const pool=randPool().filter(x=>!selCarrys.includes(x.n));randCarry=pool.length?pool[Math.floor(Math.random()*pool.length)].n:''}
+
 let cpkQ='',cpkT='all';
 function renderCarryList(){const l=document.getElementById('coCarryList');if(!l)return;const hasPlay=hasPlayItem();let list=carList();if(!hasPlay)list=list.filter(x=>x.tier==='文哥'||x.tier==='文叔'||x.tier==='文神');if(cpkQ)list=list.filter(x=>x.n.includes(cpkQ));if(cpkT!=='all')list=list.filter(x=>x.tier===cpkT);const cnt=document.getElementById('cpkCount');if(cnt)cnt.textContent='已选 '+selCarrys.length+'/2';if(!list.length){l.innerHTML='<div class="empty" style="padding:22px 10px"><div class="ic">🔍</div><p>没有找到匹配的打手</p></div>';return}l.innerHTML=list.map(x=>{const sel=selCarrys.includes(x.n);return `<div class="carry-pick-item ${sel?'sel':''}" onclick="chooseCarry('${x.n}')"><div class="cpa">${x.avatar?`<img src="${x.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="${x.n}">`:x.n[0]}</div><div class="cpn"><div class="t">${x.n}<span class="stars"> ${'★'.repeat(x.s)}${'☆'.repeat(5-x.s)}</span></div><div class="s">${tierTag(x)} ${(x.t||[]).slice(0,1).join('')}</div></div></div>`}).join('')}
 function cpkSearch(v){cpkQ=(v||'').trim();renderCarryList()}
 function cpkTier(t){cpkT=t;document.querySelectorAll('#cpkTier .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===t));renderCarryList()}
-function pickCarry(on){carryOn=on;document.getElementById('cpk-no').classList.toggle('active',!on);document.getElementById('cpk-yes').classList.toggle('active',!!on);document.getElementById('coCarryBox').style.display=on?'block':'none';if(!on){selCarrys=[];randCarry=''}cpkQ='';cpkT='all';const se=document.getElementById('cpkSearch');if(se)se.value='';renderCarryList();renderCheckItems();renderCheckTotals()}
-function chooseCarry(n){const has=selCarrys.includes(n);if(has){selCarrys=selCarrys.filter(x=>x!==n)}else{if(selCarrys.length>=2){toast('最多选 2 位打手');return}selCarrys=[...selCarrys,n]}randCarry='';renderCarryList();renderCheckItems();renderCheckTotals()}
+function pickCarry(on){carryOn=on;document.getElementById('cpk-no').classList.toggle('active',!on);document.getElementById('cpk-yes').classList.toggle('active',!!on);document.getElementById('coCarryBox').style.display=on?'block':'none';if(!on){selCarrys=[]}cpkQ='';cpkT='all';const se=document.getElementById('cpkSearch');if(se)se.value='';renderCarryList();renderCheckItems();renderCheckTotals()}
+function chooseCarry(n){const has=selCarrys.includes(n);if(has){selCarrys=selCarrys.filter(x=>x!==n)}else{if(selCarrys.length>=2){toast('最多选 2 位');return}selCarrys=[...selCarrys,n]}renderCarryList();renderCheckItems();renderCheckTotals()}
 function applyCoupon(){
   const code=(document.getElementById('coCoupon').value||'').trim().toUpperCase();
   const msg=document.getElementById('coCouponMsg');
@@ -919,7 +1012,7 @@ function payDone(){
   svInfo();
   if(payMethod==='wallet')localStorage.setItem('wv6wallet',(walletBal()-payFinal).toFixed(2));
   logCoupon();
-  ca=[];curCoupon=null;checkInfo={};carryOn=0;selCarrys=[];randCarry='';uCart();closeCart();sv();rAll();toast('✅ 支付成功，下单完成！');swCust('myorders')
+  ca=[];curCoupon=null;checkInfo={};carryOn=0;selCarrys=[];uCart();closeCart();sv();rAll();toast('✅ 支付成功，下单完成！');swCust('myorders')
 }
 
 const FILTER_TAGS=[];
@@ -939,7 +1032,7 @@ function openPro(n){const c=carList().find(x=>x.n===n);if(!c)return;const m=TIER
 let curPro='';
 function orderFromPro(){if(!curPro)return;pickCarry(1);chooseCarry(curPro);swCust('order');toast('已指定打手 '+curPro+'，加购后提交')}
 
-function swCust(t){if(role!=='customer')return;closeCart();curTab=t;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const pm={home:'ch',order:'corder',carries:'cc',myorders:'cmy',profile:'cp',faq:'cfaq',pay:'cpay',check:'ccheck',pro:'cpro'};const e=document.getElementById(pm[t]||('c'+t));if(e)e.classList.add('active');document.body.classList.toggle('pay-mode',t==='pay');document.getElementById('ctab').style.display=t==='pay'?'none':'flex';if(['home','order','carries','myorders','profile'].indexOf(t)>=0){document.querySelectorAll('#ctab .tab-item').forEach(x=>x.classList.remove('active'));const i=['home','order','carries','myorders','profile'].indexOf(t);const el=document.querySelector(`#ctab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active')}uCart();rAll()}
+function swCust(t){if(role!=='customer')return;closeCart();curTab=t;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const pm={home:'ch',order:'corder',carries:'cc',myorders:'cmy',profile:'cp',faq:'cfaq',pay:'cpay',check:'ccheck',pro:'cpro',fun:'cfun'};const e=document.getElementById(pm[t]||('c'+t));if(e)e.classList.add('active');document.body.classList.toggle('pay-mode',t==='pay'||t==='fun');document.getElementById('ctab').style.display=(t==='pay'||t==='fun')?'none':'flex';if(['home','order','carries','myorders','profile'].indexOf(t)>=0){document.querySelectorAll('#ctab .tab-item').forEach(x=>x.classList.remove('active'));const i=['home','order','carries','myorders','profile'].indexOf(t);const el=document.querySelector(`#ctab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active')}uCart();rAll()}
 function swRole(r){role=r;document.querySelectorAll('.r-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.r-btn[data-r="${r}"]`).classList.add('active');adm=r==='admin';document.getElementById('ctab').style.display=(r==='customer')?'flex':'none';document.getElementById('atab').style.display=(r==='admin')?'flex':'none';document.getElementById('btab').style.display=(r==='carrier')?'flex':'none';document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));if(r==='admin'){document.getElementById('alogin').classList.add('active')}else if(r==='carrier'){if(csess()){document.getElementById('dnew').classList.add('active');curCar='new'}else{document.getElementById('dlogin').classList.add('active')}}else{curTab='home';document.getElementById('ch').classList.add('active');document.querySelectorAll('#ctab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#ctab .tab-item:first-child').classList.add('active')}uCart();rAll()}
 function al(){if(document.getElementById('apw').value==='admin987'){document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));document.getElementById('adash').classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('#atab .tab-item:first-child').classList.add('active');rAll();toast('✅登录成功')}else toast('❌密码错误')}
 function swAdmin(t){if(role!=='admin')return;document.querySelectorAll('.pages-wrap>.page').forEach(p=>p.classList.remove('active'));const e=document.getElementById('a'+({dashboard:'dash',orders:'orders',carriers:'carriers',voice:'voice',stats:'stats'}[t]||t));if(e)e.classList.add('active');document.querySelectorAll('#atab .tab-item').forEach(tl=>tl.classList.remove('active'));const i=['dashboard','orders','carriers','voice','stats'].indexOf(t);const el=document.querySelector(`#atab .tab-item:nth-child(${i+1})`);if(el)el.classList.add('active');rAll()}
@@ -992,16 +1085,18 @@ function dl(){const n=document.getElementById('dlName').value.trim(),p=document.
 function dLogout(){localStorage.removeItem('wv6csess');swRole('carrier');toast('已退出登录')}
 function dMine(){const me=csess();return O.filter(o=>o.carrier===me)}
 function dCard(o){const si=SM[o.status]||{l:'?',c:''};const its=o.items?o.items.map(itName).join('、'):'订单';let ac='';if(o.status==='pending')ac=`<div class="actions"><button class="ba" onclick="dAc(${o.id})">✅接单</button></div>`;else if(o.status==='active')ac=`<div class="actions"><button class="bg" onclick="dSt(${o.id})">💰结账</button><button class="by" onclick="dP(${o.id})">⏸️存单</button></div>`;else if(o.status==='paused')ac=`<div class="actions"><button class="bg" onclick="dRs(${o.id})">▶️恢复</button><button class="bo" onclick="dSt(${o.id})">💰结账</button></div>`;const ctxt=carryTxt(o);return `<div class="order-card"><div class="top"><div class="svc">#${o.id} ${its}</div><span class="st ${si.c}">${si.l}</span></div>${ctxt?`<div class="desc" style="color:var(--accent);font-weight:600">${ctxt}</div>`:''}<div class="desc">📞${o.wechat||'无'}${o.phone?' · '+o.phone:''}${o.gameId?' · 🎮'+o.gameId:''}${o.note?' · '+o.note:''}</div><div class="meta"><span>🕐${o.createdAt}</span><span class="price">¥${o.total||0}</span></div>${ac}</div>`}
-function dAc(id){const o=O.find(x=>x.id===id);if(!o||o.status!=='pending')return;if(o.carry&&o.carry.length&&!carryHit(o,csess())){toast('此单已指定其他打手');return}o.status='active';o.carrier=csess();o.acceptAt=new Date().toLocaleString('zh-CN');sv();rAll();toast('✅已接单')}
+function dAc(id){const o=O.find(x=>x.id===id);if(!o||o.status!=='pending')return;if(oLocked(o)&&!carryHit(o,csess())){toast('此单仅指定打手可接');return}o.status='active';o.carrier=csess();o.acceptAt=new Date().toLocaleString('zh-CN');sv();rAll();toast('✅已接单')}
 function dSt(id){const o=O.find(x=>x.id===id);if(!o||o.carrier!==csess())return;o.status='done';sv();rAll();toast('💰已结账')}
 function dP(id){const o=O.find(x=>x.id===id);if(!o||o.carrier!==csess())return;o.status='paused';sv();rAll();toast('⏸️已存单')}
 function dRs(id){const o=O.find(x=>x.id===id);if(!o||o.carrier!==csess())return;o.status='active';sv();rAll();toast('▶️已恢复')}
 function daf(f){document.querySelectorAll('#daf .ftab').forEach(e=>e.classList.toggle('active',e.dataset.f===f));rDAct()}
+
 function carryHit(o,me){const c=o.carry;if(!c||!c.length)return true;if(Array.isArray(c))return c.includes(me);return c===me}
-function carryTxt(o){const c=o.carry;if(!c||!c.length)return'';const names=Array.isArray(c)?c.join('、'):c;return '🎯指定：'+names}
+function oLocked(o){const c=o.carry;return !!(c&&c.length>=2)}
+function carryTxt(o){const c=o.carry;if(!c||!c.length)return'';const names=Array.isArray(c)?c.join('、'):c;if(c.length>=2)return '🔒老板指定：'+names+'（仅限这 2 位接）';return '🎯老板指定：'+names+'（剩 1 位，大家抢）'}
 function oHasPlay(o){return(o.items||[]).some(c=>c.category==='陪玩价格')}
 function oCanSee(o,me){if(oHasPlay(o))return true;const a=CR2.find(x=>x.n===me);return !(a&&a.tier==='文宝宝')}
-function rDNew(){const el=document.getElementById('dnewList');if(!el)return;const me=csess();let l=O.filter(o=>o.status==='pending'&&carryHit(o,me)&&oCanSee(o,me)).sort((a,b)=>b.id-a.id);document.getElementById('dnewN').textContent=l.length+' 单';el.innerHTML=l.length?l.map(dCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无待接单</p></div>'}
+function rDNew(){const el=document.getElementById('dnewList');if(!el)return;const me=csess();let l=O.filter(o=>o.status==='pending'&&(!oLocked(o)||carryHit(o,me))&&oCanSee(o,me)).sort((a,b)=>b.id-a.id);document.getElementById('dnewN').textContent=l.length+' 单';el.innerHTML=l.length?l.map(dCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无待接单</p></div>'}
 function rDAct(){const el=document.getElementById('dactList');if(!el)return;const f=document.querySelector('#daf .ftab.active').dataset.f;let l=dMine().filter(o=>o.status===f).sort((a,b)=>b.id-a.id);el.innerHTML=l.length?l.map(dCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无</p></div>'}
 function rDHist(){const el=document.getElementById('dhistList');if(!el)return;let l=dMine().filter(o=>o.status==='done'||o.status==='rejected').sort((a,b)=>b.id-a.id);el.innerHTML=l.length?l.map(dCard).join(''):'<div class="empty"><div class="ic">📭</div><p>暂无历史订单</p></div>'}
 function rDPro(){const el=document.getElementById('dProName');if(!el)return;const me=csess(),a=CR2.find(x=>x.n===me);if(!a)return;el.textContent=me;const done=dMine().filter(o=>o.status==='done').length;document.getElementById('dProStat').textContent='已完成 '+done+' 单';const img=document.getElementById('dAvaImg'),txt=document.getElementById('dAvaTxt');if(a.avatar){img.src=a.avatar;img.style.display='block';txt.style.display='none'}else{img.style.display='none';txt.style.display='block'}const vst=document.getElementById('dVst');const vTxt={0:'无',1:'审核中',2:'已通过',3:'已拒绝'};vst.textContent=vTxt[a.vStatus]||'无';vst.className='vst'+(a.vStatus===1?' w':a.vStatus===2?' ok':a.vStatus===3?' no':'');rDTags()}
@@ -1051,8 +1146,8 @@ function cm(id){document.getElementById(id).classList.remove('show')}
 function ldInfo(){try{const r=JSON.parse(localStorage.getItem('wv6info')||'{}');const g=document.getElementById('coGameId'),w=document.getElementById('coWechat');if(g&&r.gameId)g.value=r.gameId;if(w&&r.wechat)w.value=r.wechat}catch(e){}}
 function svInfo(){try{localStorage.setItem('wv6info',JSON.stringify({gameId:document.getElementById('coGameId').value.trim(),wechat:document.getElementById('coWechat').value.trim()}))}catch(e){}}
 function toggleCoupon(){const b=document.getElementById('coCouponBox'),a=document.getElementById('coCouponArrow');const open=b.style.display!=='none';b.style.display=open?'none':'block';a.style.transform=open?'rotate(0deg)':'rotate(90deg)'}
-function reOrder(id){const o=O.find(x=>x.id===id);if(!o||!o.items)return;ca=o.items.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));carryOn=0;selCarrys=[];randCarry='';if(o.carry&&o.carry.length){carryOn=1;selCarrys=Array.isArray(o.carry)?o.carry.slice():[o.carry]}uCart();swCust('order');toast('已加入购物车')}
-function reOrderLast(){cm('mOk');payDone();ca=lastItems.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));carryOn=0;selCarrys=[];randCarry='';if(lastCarry&&lastCarry.length){carryOn=1;selCarrys=lastCarry.slice()}uCart();swCust('order');toast('已加入购物车')}
+function reOrder(id){const o=O.find(x=>x.id===id);if(!o||!o.items)return;ca=o.items.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));carryOn=0;selCarrys=[];if(o.carry&&o.carry.length){carryOn=1;selCarrys=Array.isArray(o.carry)?o.carry.slice():[o.carry]}uCart();swCust('order');toast('已加入购物车')}
+function reOrderLast(){cm('mOk');payDone();ca=lastItems.map(c=>({category:c.category,tier:c.tier,price:c.price,desc:c.desc,qty:c.qty||1}));carryOn=0;selCarrys=[];if(lastCarry&&lastCarry.length){carryOn=1;selCarrys=lastCarry.slice()}uCart();swCust('order');toast('已加入购物车')}
 function tf(el){el.classList.toggle('open')}
 let toastT=null;
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');if(toastT)clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200)}
